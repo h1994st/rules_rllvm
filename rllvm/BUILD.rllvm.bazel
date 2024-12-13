@@ -1,0 +1,59 @@
+load("@rllvm_deps//:defs.bzl", "aliases", "all_crate_deps")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
+
+rust_library(
+    name = "rllvm_lib",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/bin/**"],
+    ),
+    aliases = aliases(),
+    crate_name = "rllvm",
+    crate_root = "src/lib.rs",
+    proc_macro_deps = all_crate_deps(
+        proc_macro = True,
+    ),
+    deps = all_crate_deps(
+        normal = True,
+    ),
+)
+
+rust_binary(
+    name = "rllvm-cc",
+    srcs = ["src/bin/rllvm_cc.rs"],
+    crate_root = "src/bin/rllvm_cc.rs",
+    proc_macro_deps = all_crate_deps(
+        proc_macro = True,
+    ),
+    deps = all_crate_deps(
+        normal = True,
+    ) + [":rllvm_lib"],
+)
+
+rust_binary(
+    name = "rllvm-cxx",
+    srcs = ["src/bin/rllvm_cxx.rs"] + glob([
+        "src/*.rs",
+        "src/compiler_wrapper/**/*.rs",
+        "src/utils/*.rs",
+    ]),
+    crate_root = "src/bin/rllvm_cxx.rs",
+    deps = all_crate_deps(
+        normal = True,
+        proc_macro = True,
+    ),
+)
+
+rust_binary(
+    name = "rllvm-get-bc",
+    srcs = ["src/bin/rllvm_get_bc.rs"] + glob([
+        "src/*.rs",
+        "src/compiler_wrapper/**/*.rs",
+        "src/utils/*.rs",
+    ]),
+    crate_root = "src/bin/rllvm_get-bc.rs",
+    deps = all_crate_deps(
+        normal = True,
+        proc_macro = True,
+    ),
+)

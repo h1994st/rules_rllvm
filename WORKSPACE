@@ -30,3 +30,41 @@ http_archive(
 load("@toolchains_llvm//toolchain:deps.bzl", "bazel_toolchain_dependencies")
 
 bazel_toolchain_dependencies()
+
+# rules_rust
+http_archive(
+    name = "rules_rust",
+    integrity = "sha256-gnStljEH4UDf911b/+nRt7CaV5WPHqNhYhQr0OevUjI=",
+    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.55.6/rules_rust-0.55.6.tar.gz"],
+)
+
+load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
+
+rules_rust_dependencies()
+
+rust_register_toolchains(
+    edition = "2021",
+    versions = ["1.83.0"],
+)
+
+# rllvm
+http_archive(
+    name = "rllvm",
+    build_file = "//rllvm:BUILD.rllvm.bazel",
+    strip_prefix = "rllvm-0.1.2",
+    type = "tar.gz",
+    urls = ["https://static.crates.io/crates/rllvm/rllvm-0.1.2.crate"],
+)
+
+load("@rules_rust//crate_universe:defs.bzl", "crates_repository")
+
+crates_repository(
+    name = "rllvm_deps",
+    cargo_lockfile = "@rllvm//:Cargo.lock",
+    generate_binaries = True,
+    manifests = ["@rllvm//:Cargo.toml"],
+)
+
+load("@rllvm_deps//:defs.bzl", rllvm_deps = "crate_repositories")
+
+rllvm_deps()

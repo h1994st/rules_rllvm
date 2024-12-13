@@ -11,6 +11,6 @@ def rllvm_toolchain(name, llvm_version, **kwargs):
 
     # TODO: load rllvm, rewrite llvm toolchain to use rllvm-cc
 
-    load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
+    load("@{}//:toolchains.bzl".format(name), "llvm_register_toolchains")
 
     llvm_register_toolchains()
