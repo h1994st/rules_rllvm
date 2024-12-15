@@ -1,6 +1,6 @@
 "rllvm-wrapped LLVM"
 
-load("@rules_rllvm//toolchain/rules.bzl", "LLVM_TOOLCHAIN_INTERNAL")
+load("@rules_rllvm//toolchain:rules.bzl", "LLVM_TOOLCHAIN_INTERNAL")
 
 package(default_visibility = ["//visibility:public"])
 

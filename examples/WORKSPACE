@@ -37,3 +37,7 @@ rllvm_toolchain(
     "rllvm_toolchain",
     llvm_version = "19.1.0",
 )
+
+# TODO: resolve the cycle issue in dependency graph.
+# It seems that Rust targets depends on cc toolchains
+register_toolchains("@rllvm_toolchain//:all")
