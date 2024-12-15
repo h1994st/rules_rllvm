@@ -1,0 +1,14 @@
+workspace(name = "rules_rllvm_examples")
+
+local_repository(
+    name = "rules_rllvm",
+    path = "..",
+)
+
+load("@rules_rllvm//toolchain:deps.bzl", "rules_rllvm_dependencies")
+
+rules_rllvm_dependencies()
+
+load("@rules_rllvm//toolchain:rules.bzl", "rllvm_toolchain")
+
+rllvm_toolchain("rllvm_toolchain", "18.1.8")
