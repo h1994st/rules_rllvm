@@ -2,11 +2,15 @@
 
 load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
-def rllvm_toolchain(name, **kwargs):
-    llvm_toolchain(
-        name = name,
-        llvm_version = llvm_version,
-        **kwargs
-    )
+LLVM_TOOLCHAIN_INTERNAL = "llvm_toolchain_internal"
 
-    # TODO: load rllvm, rewrite llvm toolchain to use rllvm-cc
+def rllvm_toolchain(name, **kwargs):
+    """
+    Reuse `toolchains_llvm` and configure `rllvm` as the compiler
+    """
+
+    # `llvm_toolchain` may download LLVM if specified, and a LLVM
+    # toolchain is created
+    llvm_toolchain(name = LLVM_TOOLCHAIN_INTERNAL, **kwargs)
+
+    # TODO: Recrate a new repository for rllvm-wrapped LLVM files

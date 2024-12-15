@@ -1,6 +1,8 @@
 load("@rllvm_deps//:defs.bzl", "aliases", "all_crate_deps")
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
 
+package(default_visibility = ["//visibility:public"])
+
 rust_library(
     name = "rllvm_lib",
     srcs = glob(
@@ -32,16 +34,21 @@ rust_binary(
 
 rust_binary(
     name = "rllvm-cxx",
-    srcs = ["src/bin/rllvm_cxx.rs"] + glob([
+    srcs = [
+        "src/bin/rllvm_cc.rs",
+        "src/bin/rllvm_cxx.rs",
+    ] + glob([
         "src/*.rs",
         "src/compiler_wrapper/**/*.rs",
         "src/utils/*.rs",
     ]),
     crate_root = "src/bin/rllvm_cxx.rs",
-    deps = all_crate_deps(
-        normal = True,
+    proc_macro_deps = all_crate_deps(
         proc_macro = True,
     ),
+    deps = all_crate_deps(
+        normal = True,
+    ) + [":rllvm_lib"],
 )
 
 rust_binary(
@@ -52,8 +59,10 @@ rust_binary(
         "src/utils/*.rs",
     ]),
     crate_root = "src/bin/rllvm_get-bc.rs",
-    deps = all_crate_deps(
-        normal = True,
+    proc_macro_deps = all_crate_deps(
         proc_macro = True,
     ),
+    deps = all_crate_deps(
+        normal = True,
+    ) + [":rllvm_lib"],
 )

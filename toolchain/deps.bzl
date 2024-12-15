@@ -29,3 +29,13 @@ def rules_rllvm_dependencies():
             integrity = "sha256-gnStljEH4UDf911b/+nRt7CaV5WPHqNhYhQr0OevUjI=",
             urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.55.6/rules_rust-0.55.6.tar.gz"],
         )
+
+    if not native.existing_rule("rllvm"):
+        # rllvm
+        http_archive(
+            name = "rllvm",
+            build_file = Label("//rllvm:BUILD.rllvm.bazel"),
+            strip_prefix = "rllvm-0.1.2",
+            type = "tar.gz",
+            urls = ["https://static.crates.io/crates/rllvm/rllvm-0.1.2.crate"],
+        )

@@ -1,0 +1,103 @@
+"rllvm-wrapped LLVM"
+
+load("@rules_rllvm//toolchain/rules.bzl", "LLVM_TOOLCHAIN_INTERNAL")
+
+package(default_visibility = ["//visibility:public"])
+
+LLVM_REPO = LLVM_TOOLCHAIN_INTERNAL + "_llvm"
+
+# TODO: what about exported files? using soft links?
+
+filegroup(
+    name = "clang",
+    srcs = [
+        "@rllvm//:rllvm-cc",
+        "@rllvm//:rllvm-cxx",
+        "@{}//:bin/clang-cpp".format(LLVM_REPO),
+    ],
+)
+
+alias(
+    name = "ld",
+    actual = "@{}//:ld".format(LLVM_REPO),
+)
+
+alias(
+    name = "include",
+    actual = "@{}//:include".format(LLVM_REPO),
+)
+
+alias(
+    name = "all_includes",
+    actual = "@{}//:all_includes".format(LLVM_REPO),
+)
+
+alias(
+    name = "bin",
+    actual = "@{}//:bin".format(LLVM_REPO),
+)
+
+alias(
+    name = "lib",
+    actual = "@{}//:lib".format(LLVM_REPO),
+)
+
+alias(
+    name = "ar",
+    actual = "@{}//:ar".format(LLVM_REPO),
+)
+
+alias(
+    name = "as",
+    actual = "@{}//:as".format(LLVM_REPO),
+)
+
+alias(
+    name = "nm",
+    actual = "@{}//:nm".format(LLVM_REPO),
+)
+
+alias(
+    name = "objcopy",
+    actual = "@{}//:objcopy".format(LLVM_REPO),
+)
+
+alias(
+    name = "objdump",
+    actual = "@{}//:objdump".format(LLVM_REPO),
+)
+
+alias(
+    name = "profdata",
+    actual = "@{}//:profdata".format(LLVM_REPO),
+)
+
+alias(
+    name = "dwp",
+    actual = "@{}//:dwp".format(LLVM_REPO),
+)
+
+alias(
+    name = "ranlib",
+    actual = "@{}//:ranlib".format(LLVM_REPO),
+)
+
+alias(
+    name = "readelf",
+    actual = "@{}//:readelf".format(LLVM_REPO),
+)
+
+alias(
+    name = "strip",
+    actual = "@{}//:strip".format(LLVM_REPO),
+)
+
+alias(
+    name = "symbolizer",
+    actual = "@{}//:symbolizer".format(LLVM_REPO),
+)
+
+alias(
+    name = "clang-tidy",
+    actual = "@{}//:clang-tidy".format(LLVM_REPO),
+)
