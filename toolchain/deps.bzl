@@ -35,7 +35,7 @@ def rules_rllvm_dependencies():
         http_archive(
             name = "rllvm",
             build_file = Label("//rllvm:BUILD.rllvm.bazel"),
-            strip_prefix = "rllvm-0.1.2",
-            type = "tar.gz",
-            urls = ["https://static.crates.io/crates/rllvm/rllvm-0.1.2.crate"],
+            sha256 = "31dea623a2865f7b070880b7534747bba66103c089403d46f935a92f1ffa3b9e",
+            strip_prefix = "rllvm-x86_64-unknown-linux-gnu",
+            urls = ["https://github.com/h1994st/rllvm/releases/download/v0.1.3/rllvm-x86_64-unknown-linux-gnu.tar.xz"],
         )

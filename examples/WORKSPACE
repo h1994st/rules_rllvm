@@ -9,35 +9,13 @@ load("@rules_rllvm//toolchain:deps.bzl", "rules_rllvm_dependencies")
 
 rules_rllvm_dependencies()
 
-load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
-
-rules_rust_dependencies()
-
-rust_register_toolchains(
-    edition = "2021",
-    versions = ["1.83.0"],
-)
-
-load("@rules_rust//crate_universe:defs.bzl", "crates_repository")
-
-crates_repository(
-    name = "rllvm_deps",
-    cargo_lockfile = "@rllvm//:Cargo.lock",
-    generate_binaries = True,
-    manifests = ["@rllvm//:Cargo.toml"],
-)
-
-load("@rllvm_deps//:defs.bzl", rllvm_deps = "crate_repositories")
-
-rllvm_deps()
-
 load("@rules_rllvm//toolchain:rules.bzl", "rllvm_toolchain")
 
 rllvm_toolchain(
     "rllvm_toolchain",
     llvm_version = "19.1.0",
+    rllvm_log_level = 5,
+    skip_bitcode_generation = True,
 )
 
-# TODO: resolve the cycle issue in dependency graph.
-# It seems that Rust targets depends on cc toolchains
 register_toolchains("@rllvm_toolchain//:all")

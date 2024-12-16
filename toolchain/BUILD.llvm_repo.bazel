@@ -1,103 +1,151 @@
 "rllvm-wrapped LLVM"
 
-load("@rules_rllvm//toolchain:rules.bzl", "LLVM_TOOLCHAIN_INTERNAL")
-
 package(default_visibility = ["//visibility:public"])
 
-LLVM_REPO = LLVM_TOOLCHAIN_INTERNAL + "_llvm"
-
-# TODO: what about exported files? using soft links?
+exports_files(glob(
+    [
+        "bin/*",
+        "lib/*",
+        "include/*",
+        "share/clang/*",
+    ],
+    allow_empty = True,
+))
 
 filegroup(
     name = "clang",
     srcs = [
+        "bin/clang",
+        "bin/clang++",
+        "bin/clang++-orig",
+        "bin/clang-cpp",
+        "bin/clang-cpp-orig",
+        "bin/clang-orig",
+        "bin/rllvm_cc_wrapper.sh",
+        "bin/rllvm_config.yml",
         "@rllvm//:rllvm-cc",
         "@rllvm//:rllvm-cxx",
-        "@{}//:bin/clang-cpp".format(LLVM_REPO),
+        "@rllvm//:rllvm-get-bc",
     ],
 )
 
-alias(
+filegroup(
     name = "ld",
-    actual = "@{}//:ld".format(LLVM_REPO),
+    srcs = [
+        "bin/ld.lld",
+        "bin/ld64.lld",
+        "bin/wasm-ld",
+    ],
 )
 
-alias(
+filegroup(
     name = "include",
-    actual = "@{}//:include".format(LLVM_REPO),
+    srcs = glob([
+        "include/**/c++/**",
+        "lib/clang/*/include/**",
+    ]),
 )
 
-alias(
+filegroup(
     name = "all_includes",
-    actual = "@{}//:all_includes".format(LLVM_REPO),
+    srcs = glob(
+        ["include/**"],
+        allow_empty = True,
+    ),
 )
 
-alias(
+filegroup(
     name = "bin",
-    actual = "@{}//:bin".format(LLVM_REPO),
+    srcs = glob(["bin/**"]),
 )
 
-alias(
+filegroup(
     name = "lib",
-    actual = "@{}//:lib".format(LLVM_REPO),
+    srcs = glob(
+        [
+            "lib/**/lib*.a",
+            "lib/clang/*/lib/**/*.a",
+            "lib/clang/*/lib/**/*.dylib",
+            # clang_rt.*.o supply crtbegin and crtend sections.
+            "lib/**/clang_rt.*.o",
+        ],
+        allow_empty = True,
+        exclude = [
+            "lib/libLLVM*.a",
+            "lib/libclang*.a",
+            "lib/liblld*.a",
+        ],
+    ),
+    # Include the .dylib files in the linker sandbox even though they will
+    # not be available at runtime to allow sanitizers to work locally.
+    # Any library linked from the toolchain to be released should be linked statically.
 )
 
-alias(
+filegroup(
     name = "ar",
-    actual = "@{}//:ar".format(LLVM_REPO),
+    srcs = ["bin/llvm-ar"],
 )
 
-alias(
+filegroup(
     name = "as",
-    actual = "@{}//:as".format(LLVM_REPO),
+    srcs = [
+        "bin/clang",
+        "bin/clang-orig",
+        "bin/llvm-as",
+        "bin/rllvm_cc_wrapper.sh",
+        "bin/rllvm_config.yml",
+        "@rllvm//:rllvm-cc",
+        "@rllvm//:rllvm-cxx",
+        "@rllvm//:rllvm-get-bc",
+    ],
 )
 
-alias(
+filegroup(
     name = "nm",
-    actual = "@{}//:nm".format(LLVM_REPO),
+    srcs = ["bin/llvm-nm"],
 )
 
-alias(
+filegroup(
     name = "objcopy",
-    actual = "@{}//:objcopy".format(LLVM_REPO),
+    srcs = ["bin/llvm-objcopy"],
 )
 
-alias(
+filegroup(
     name = "objdump",
-    actual = "@{}//:objdump".format(LLVM_REPO),
+    srcs = ["bin/llvm-objdump"],
 )
 
-alias(
+filegroup(
     name = "profdata",
-    actual = "@{}//:profdata".format(LLVM_REPO),
+    srcs = ["bin/llvm-profdata"],
 )
 
-alias(
+filegroup(
     name = "dwp",
-    actual = "@{}//:dwp".format(LLVM_REPO),
+    srcs = ["bin/llvm-dwp"],
 )
 
-alias(
+filegroup(
     name = "ranlib",
-    actual = "@{}//:ranlib".format(LLVM_REPO),
+    srcs = ["bin/llvm-ranlib"],
 )
 
-alias(
+filegroup(
     name = "readelf",
-    actual = "@{}//:readelf".format(LLVM_REPO),
+    srcs = ["bin/llvm-readelf"],
 )
 
-alias(
+filegroup(
     name = "strip",
-    actual = "@{}//:strip".format(LLVM_REPO),
+    srcs = ["bin/llvm-strip"],
 )
 
-alias(
+filegroup(
     name = "symbolizer",
-    actual = "@{}//:symbolizer".format(LLVM_REPO),
+    srcs = ["bin/llvm-symbolizer"],
 )
 
-alias(
+filegroup(
     name = "clang-tidy",
-    actual = "@{}//:clang-tidy".format(LLVM_REPO),
+    srcs = ["bin/clang-tidy"],
 )
