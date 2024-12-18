@@ -84,6 +84,7 @@ def rllvm_wrapper_repo_impl(rctx):
     else:
         llvm_dist_path_prefix = _pkg_path_from_label(rllvm_dist_label) + "../" + rctx.attr.name + "/"
     llvm_dist_absolute_path_prefix = _canonical_dir_path(str(rctx.path(rllvm_dist_label).dirname)) + "../" + rctx.attr.name + "/"
+    llvm_dist_relative_path_prefix = _pkg_path_from_label(rllvm_dist_label) + "../" + rctx.attr.name + "/"
 
     # Create rllvm-cc wrapper
     rctx.template(
@@ -99,7 +100,7 @@ def rllvm_wrapper_repo_impl(rctx):
         "bin/rllvm_cc_wrapper.sh",
         Label("//toolchain:rllvm_cc_wrapper.sh.tpl"),
         {
-            "%{llvm_dist_path_prefix}": llvm_dist_path_prefix,
+            "%{llvm_dist_path_prefix}": llvm_dist_relative_path_prefix,
             "%{rllvm_dist_path_prefix}": _pkg_path_from_label(Label("@rllvm//:rllvm-cc")),
         },
     )
