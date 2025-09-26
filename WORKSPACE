@@ -5,8 +5,11 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 # bazel_skylib
 http_archive(
     name = "bazel_skylib",
-    sha256 = "bc283cdfcd526a52c3201279cda4bc298652efa898b10b4db0837dc51652756f",
-    url = "https://github.com/bazelbuild/bazel-skylib/releases/download/1.7.1/bazel-skylib-1.7.1.tar.gz",
+    sha256 = "6e78f0e57de26801f6f564fa7c4a48dc8b36873e416257a92bbb0937eeac8446",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.8.2/bazel-skylib-1.8.2.tar.gz",
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.8.2/bazel-skylib-1.8.2.tar.gz",
+    ],
 )
 
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
@@ -21,10 +24,10 @@ versions.check(minimum_bazel_version = "3.7.0")
 # toolchains_llvm
 http_archive(
     name = "toolchains_llvm",
-    canonical_id = "v1.2.0",
-    sha256 = "e3fb6dc6b77eaf167cb2b0c410df95d09127cbe20547e5a329c771808a816ab4",
-    strip_prefix = "toolchains_llvm-v1.2.0",
-    url = "https://github.com/bazel-contrib/toolchains_llvm/releases/download/v1.2.0/toolchains_llvm-v1.2.0.tar.gz",
+    canonical_id = "v1.5.0",
+    sha256 = "49e69c011bcaa4c9a7246a287ab1fb4f7ed3fde7cbd7300374c1030f40d2bb95",
+    strip_prefix = "toolchains_llvm-v1.5.0",
+    url = "https://github.com/bazel-contrib/toolchains_llvm/releases/download/v1.5.0/toolchains_llvm-v1.5.0.tar.gz",
 )
 
 load("@toolchains_llvm//toolchain:deps.bzl", "bazel_toolchain_dependencies")
@@ -35,7 +38,7 @@ bazel_toolchain_dependencies()
 http_archive(
     name = "rllvm",
     build_file = "//rllvm:BUILD.rllvm.bazel",
-    sha256 = "31dea623a2865f7b070880b7534747bba66103c089403d46f935a92f1ffa3b9e",
+    sha256 = "02dd14c23fac8807a0fac5918d615fa7431b4103696ae77b3ee9f32502fbedf4",
     strip_prefix = "rllvm-x86_64-unknown-linux-gnu",
-    urls = ["https://github.com/h1994st/rllvm/releases/download/v0.1.3/rllvm-x86_64-unknown-linux-gnu.tar.xz"],
+    urls = ["https://github.com/h1994st/rllvm/releases/download/v0.1.6/rllvm-x86_64-unknown-linux-gnu.tar.xz"],
 )
