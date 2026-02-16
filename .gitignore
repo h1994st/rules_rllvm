@@ -1,3 +1,6 @@
 /bazel-*
 MODULE.bazel.lock
 .bazelversion
+
+### Claude Code ###
+settings.local.json
