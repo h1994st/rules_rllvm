@@ -3,3 +3,4 @@ MODULE.bazel.lock
 
 ### Claude Code ###
 settings.local.json
+.worktrees/

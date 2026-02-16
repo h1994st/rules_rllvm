@@ -12,6 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Bazelisk
+        uses: bazel-contrib/setup-bazel@0.14.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+
       - name: Build rules
         run: bazel build //...
 
