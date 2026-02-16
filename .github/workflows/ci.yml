@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build rules
+        run: bazel build //...
+
+      - name: Build examples (WORKSPACE integration test)
+        run: cd examples && bazel build //...
