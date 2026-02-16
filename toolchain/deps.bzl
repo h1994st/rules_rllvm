@@ -26,13 +26,6 @@ def rules_rllvm_dependencies():
             url = "https://github.com/bazel-contrib/toolchains_llvm/releases/download/v1.5.0/toolchains_llvm-v1.5.0.tar.gz",
         )
 
-    if not native.existing_rule("rules_rust"):
-        http_archive(
-            name = "rules_rust",
-            integrity = "sha256-YrnH/f8jCpEqGAU+keNqauc+QSde9egtcFXqPtJuee4=",
-            urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.65.0/rules_rust-0.65.0.tar.gz"],
-        )
-
     if not native.existing_rule("rllvm"):
         # rllvm
         http_archive(
