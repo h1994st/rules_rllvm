@@ -36,10 +36,10 @@ def rules_rllvm_dependencies(rllvm_version = "", rllvm_sha256 = ""):
     if not native.existing_rule("toolchains_llvm"):
         http_archive(
             name = "toolchains_llvm",
-            canonical_id = "v1.5.0",
-            sha256 = "49e69c011bcaa4c9a7246a287ab1fb4f7ed3fde7cbd7300374c1030f40d2bb95",
-            strip_prefix = "toolchains_llvm-v1.5.0",
-            url = "https://github.com/bazel-contrib/toolchains_llvm/releases/download/v1.5.0/toolchains_llvm-v1.5.0.tar.gz",
+            canonical_id = "v1.6.0",
+            sha256 = "2b298a1d7ea99679f5edf8af09367363e64cb9fbc46e0b7c1b1ba2b1b1b51058",
+            strip_prefix = "toolchains_llvm-v1.6.0",
+            url = "https://github.com/bazel-contrib/toolchains_llvm/releases/download/v1.6.0/toolchains_llvm-v1.6.0.tar.gz",
         )
 
     if not native.existing_rule("rllvm"):

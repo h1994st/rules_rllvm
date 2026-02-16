@@ -2,7 +2,7 @@
 
 module(name = "rules_rllvm_examples")
 
-bazel_dep(name = "rules_cc", version = "0.1.1")
+bazel_dep(name = "rules_cc", version = "0.2.14")
 bazel_dep(name = "rules_rllvm")
 local_path_override(
     module_name = "rules_rllvm",

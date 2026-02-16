@@ -3,9 +3,9 @@
 module(name = "rules_rllvm", version = "0.0.1", bazel_compatibility = [">=7.0.0"])
 
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
-bazel_dep(name = "platforms", version = "0.0.10")
-bazel_dep(name = "rules_cc", version = "0.1.1")
-bazel_dep(name = "toolchains_llvm", version = "1.5.0")
+bazel_dep(name = "rules_cc", version = "0.2.14")
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "toolchains_llvm", version = "1.6.0")
 
 # rllvm — version is hardcoded here for Bzlmod. To use a different rllvm version,
 # override via the rllvm_toolchain module extension (see task 004).
