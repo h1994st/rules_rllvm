@@ -19,4 +19,4 @@ else
   exit 5
 fi
 
-RLLVM_CONFIG=${execroot_path}%{llvm_dist_path_prefix}bin/rllvm_config.yml exec ${execroot_path}%{rllvm_dist_path_prefix}${rllvm_binary} "$@"
+RLLVM_CONFIG=${execroot_path}%{llvm_dist_path_prefix}bin/rllvm_config.yml exec ${execroot_path}%{rllvm_dist_path_prefix}${rllvm_binary} -- "$@"
