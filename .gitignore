@@ -1,4 +1,6 @@
 /bazel-*
+!/.bazelversion
+!/examples/.bazelversion
 MODULE.bazel.lock
 
 ### Claude Code ###
