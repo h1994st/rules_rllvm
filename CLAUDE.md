@@ -78,10 +78,12 @@ bazel build //:diamond_bc
   fails *silently*, which is the dangerous half.
 - Uses `toolchains_llvm` internal APIs (pinned to 1.6.0; 1.5.0 is
   Bazel-9-incompatible).
-- `toolchain/BUILD.llvm_repo.bazel` tracks toolchains_llvm's own
-  `BUILD.llvm_repo.tpl` and carries a `{LLVM_VERSION}` placeholder that
-  `repo.bzl` substitutes. When bumping toolchains_llvm, resync this file or
-  targets it omits will fail to resolve.
+- The LLVM repo's BUILD is toolchains_llvm's own `BUILD.llvm_repo.tpl`, read at
+  fetch time, plus `toolchain/BUILD.llvm_repo.additions.bazel`. Do **not**
+  vendor a copy of the upstream template: a stale copy fails at analysis with a
+  missing-target error far from the version bump that caused it, which is
+  exactly how `extra_config_site` broke. Only the upstream half is
+  `.format()`-substituted for `{LLVM_VERSION}`.
 - The bitcode toolchain instance lives in the LLVM **distribution** repo
   (`<name>_llvm`), not the cc_toolchain **config** repo (`<name>`), so it needs
   its own `register_toolchains` line.

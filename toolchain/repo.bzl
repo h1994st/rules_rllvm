@@ -45,14 +45,21 @@ def rllvm_wrapper_repo_impl(rctx):
         return None
     major_llvm_version = int(llvm_version.split(".")[0])
 
-    # Create BUILD.bazel. This overlay tracks toolchains_llvm's own
-    # BUILD.llvm_repo.tpl and must be substituted the same way it is upstream --
-    # the versioning scheme changed at LLVM 16.
+    # Create BUILD.bazel from toolchains_llvm's own template plus our additions.
+    #
+    # The upstream template is read directly rather than vendored: a copy would
+    # drift, and a stale copy fails at analysis with a missing-target error
+    # rather than anywhere near the version bump that caused it. {LLVM_VERSION}
+    # must be substituted the same way upstream does it -- the versioning
+    # scheme changed at LLVM 16. Only the upstream half is formatted, so braces
+    # in our additions are never interpreted.
+    upstream = rctx.read(Label("@toolchains_llvm//toolchain:BUILD.llvm_repo.tpl")).format(
+        LLVM_VERSION = major_llvm_version if major_llvm_version >= 16 else llvm_version,
+    )
+    additions = rctx.read(Label("//toolchain:BUILD.llvm_repo.additions.bazel"))
     rctx.file(
         "BUILD.bazel",
-        content = rctx.read(Label("//toolchain:BUILD.llvm_repo.bazel")).format(
-            LLVM_VERSION = major_llvm_version if major_llvm_version >= 16 else llvm_version,
-        ),
+        content = upstream + "\n" + additions,
         executable = False,
     )
 
