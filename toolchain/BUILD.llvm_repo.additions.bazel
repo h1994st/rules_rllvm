@@ -1,0 +1,39 @@
+# Appended to toolchains_llvm's own BUILD.llvm_repo.tpl by repo.bzl.
+#
+# Only rules_rllvm's additions live here. The upstream template is read
+# directly from @toolchains_llvm at fetch time rather than vendored, so this
+# file cannot drift out of sync with the toolchains_llvm version in use.
+
+# Shared libraries that some LLVM distributions link their tools against.
+# darwin's llvm-link is statically linked, but certain Linux tarballs link
+# libLLVM.so. Including this in the bitcode merge action's inputs costs nothing
+# when unused and removes a failure that would otherwise appear only on Linux.
+filegroup(
+    name = "runtime_libs",
+    srcs = glob(
+        [
+            "lib/*.so*",
+            "lib/*.dylib",
+        ],
+        allow_empty = True,
+    ),
+)
+
+# The bitcode toolchain instance. This lives in the LLVM distribution repo
+# because that is the repo rules_rllvm writes, and because the tools it points
+# at are files in this very repo -- so no cross-repo label is needed, which is
+# the whole reason a label default could not work.
+load("@rules_rllvm//bitcode:toolchain.bzl", "rllvm_bitcode_toolchain")
+
+rllvm_bitcode_toolchain(
+    name = "bitcode_tools",
+    llvm_ar = "//:bin/llvm-ar",
+    llvm_link = "//:bin/llvm-link",
+    runtime_libs = "//:runtime_libs",
+)
+
+toolchain(
+    name = "bitcode_toolchain",
+    toolchain = ":bitcode_tools",
+    toolchain_type = "@rules_rllvm//bitcode:toolchain_type",
+)

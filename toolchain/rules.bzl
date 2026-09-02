@@ -28,9 +28,13 @@ toolchain = repository_rule(
     implementation = _llvm_config_impl,
 )
 
-def rllvm_toolchain(name, rllvm_log_level = 0, skip_bitcode_generation = False, **kwargs):
+def rllvm_toolchain(name, **kwargs):
     """
-    Reuse `toolchains_llvm` and configure `rllvm` as the compiler
+    Register a stock LLVM toolchain via `toolchains_llvm`.
+
+    The drivers are not substituted. Bitcode is produced on demand by the
+    aspect in //bitcode, which builds its own compile actions from this
+    toolchain's command line.
     """
 
     if kwargs.get("llvm_version") == kwargs.get("llvm_versions"):
@@ -42,13 +46,6 @@ def rllvm_toolchain(name, rllvm_log_level = 0, skip_bitcode_generation = False, 
     # modifications on this file will not trigger any re-fetching for the
     # underlying llvm binaries
 
-    # Use absolute paths
-    # `rllvm` uses absolute path to call `clang`. However, this results in
-    # absolute includsion error in Bazel, because these absoluate inclusion
-    # paths are not included in the toolchain config file (i.e.,
-    # cxx_builtin_include_directories)
-    kwargs.update(absolute_paths = True)
-
     # `llvm_toolchain` may download LLVM if specified, and a LLVM
     # toolchain is created
     rllvm_args = {
@@ -58,8 +55,6 @@ def rllvm_toolchain(name, rllvm_log_level = 0, skip_bitcode_generation = False, 
     }
     rllvm(
         name = name + "_llvm",
-        rllvm_log_level = rllvm_log_level,
-        skip_bitcode_generation = skip_bitcode_generation,
         **rllvm_args
     )
 
