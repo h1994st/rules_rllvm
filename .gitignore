@@ -1,6 +1,8 @@
 /bazel-*
+!/.bazelversion
+!/examples/.bazelversion
 MODULE.bazel.lock
-.bazelversion
 
 ### Claude Code ###
 settings.local.json
+.worktrees/

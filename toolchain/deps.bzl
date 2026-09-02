@@ -20,25 +20,8 @@ def rules_rllvm_dependencies():
     if not native.existing_rule("toolchains_llvm"):
         http_archive(
             name = "toolchains_llvm",
-            canonical_id = "v1.5.0",
-            sha256 = "49e69c011bcaa4c9a7246a287ab1fb4f7ed3fde7cbd7300374c1030f40d2bb95",
-            strip_prefix = "toolchains_llvm-v1.5.0",
-            url = "https://github.com/bazel-contrib/toolchains_llvm/releases/download/v1.5.0/toolchains_llvm-v1.5.0.tar.gz",
-        )
-
-    if not native.existing_rule("rules_rust"):
-        http_archive(
-            name = "rules_rust",
-            integrity = "sha256-YrnH/f8jCpEqGAU+keNqauc+QSde9egtcFXqPtJuee4=",
-            urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.65.0/rules_rust-0.65.0.tar.gz"],
-        )
-
-    if not native.existing_rule("rllvm"):
-        # rllvm
-        http_archive(
-            name = "rllvm",
-            build_file = Label("//rllvm:BUILD.rllvm.bazel"),
-            sha256 = "02dd14c23fac8807a0fac5918d615fa7431b4103696ae77b3ee9f32502fbedf4",
-            strip_prefix = "rllvm-x86_64-unknown-linux-gnu",
-            urls = ["https://github.com/h1994st/rllvm/releases/download/v0.1.6/rllvm-x86_64-unknown-linux-gnu.tar.xz"],
+            canonical_id = "v1.6.0",
+            sha256 = "2b298a1d7ea99679f5edf8af09367363e64cb9fbc46e0b7c1b1ba2b1b1b51058",
+            strip_prefix = "toolchains_llvm-v1.6.0",
+            url = "https://github.com/bazel-contrib/toolchains_llvm/releases/download/v1.6.0/toolchains_llvm-v1.6.0.tar.gz",
         )

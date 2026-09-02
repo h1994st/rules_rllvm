@@ -1,4 +1,71 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@rules_rllvm//bitcode:defs.bzl", "rllvm_cc_bitcode")
+
 cc_binary(
     name = "hello",
     srcs = ["hello.c"],
+)
+
+# Diamond fixture: diamond -> {lib_a, lib_b} -> lib_c, plus a header-only
+# library. lib_c must appear exactly once in the merged module; header_only
+# must not be recorded as a skip.
+cc_library(
+    name = "lib_c",
+    srcs = ["lib_c.c"],
+    hdrs = ["lib_c.h"],
+)
+
+cc_library(
+    name = "header_only",
+    hdrs = ["header_only.h"],
+)
+
+cc_library(
+    name = "lib_a",
+    srcs = ["lib_a.c"],
+    hdrs = ["lib_a.h"],
+    deps = [":lib_c"],
+)
+
+cc_library(
+    name = "lib_b",
+    srcs = ["lib_b.c"],
+    hdrs = ["lib_b.h"],
+    deps = [":lib_c"],
+)
+
+cc_library(
+    name = "asm_only",
+    srcs = ["asm_only.S"],
+)
+
+cc_binary(
+    name = "diamond",
+    srcs = ["diamond.c"],
+    deps = [
+        ":asm_only",
+        ":header_only",
+        ":lib_a",
+        ":lib_b",
+    ],
+)
+
+rllvm_cc_bitcode(
+    name = "diamond_bc",
+    tags = ["manual"],
+    target = ":diamond",
+)
+
+rllvm_cc_bitcode(
+    name = "diamond_bc_staged",
+    strategy = "staged",
+    tags = ["manual"],
+    target = ":diamond",
+)
+
+rllvm_cc_bitcode(
+    name = "diamond_bc_archive",
+    strategy = "archive",
+    tags = ["manual"],
+    target = ":diamond",
 )
