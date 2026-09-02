@@ -21,23 +21,13 @@ def _rllvm_impl(module_ctx):
             }
             _rllvm_toolchain(**attrs)
 
-# Build the tag class attrs from the rllvm wrapper repo attrs (which already
-# include _common_attrs, _llvm_repo_attrs, _llvm_config_attrs) plus the
-# rllvm-specific parameters. We also add llvm_version as a convenient scalar
-# alternative to llvm_versions.
+# Build the tag class attrs from the LLVM repo attrs (which already include
+# _common_attrs, _llvm_repo_attrs, _llvm_config_attrs). We also add
+# llvm_version as a convenient scalar alternative to llvm_versions.
 _toolchain_attrs = {
     "name": attr.string(
         doc = "Base name for the generated repositories.",
         default = "rllvm_toolchain",
-    ),
-    "rllvm_log_level": attr.int(
-        doc = "Override the log level of rllvm (0: nothing, 1: error, 2: warn, 3: info, 4: debug, 5: trace).",
-        default = 0,
-        values = [0, 1, 2, 3, 4, 5],
-    ),
-    "skip_bitcode_generation": attr.bool(
-        doc = "Skip the bitcode generation of rllvm.",
-        default = False,
     ),
     "llvm_version": attr.string(
         doc = "Scalar LLVM version string (e.g. '19.1.0'). Converted to llvm_versions dict internally.",
