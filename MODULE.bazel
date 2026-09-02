@@ -7,14 +7,4 @@ bazel_dep(name = "rules_cc", version = "0.2.14")
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "toolchains_llvm", version = "1.6.0")
 
-# rllvm — version is hardcoded here for Bzlmod. To use a different rllvm version,
-# override via the rllvm_toolchain module extension (see task 004).
-# For WORKSPACE users, pass rllvm_version/rllvm_sha256 to rules_rllvm_dependencies().
-http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-http_archive(
-    name = "rllvm",
-    build_file = "//rllvm:BUILD.rllvm.bazel",
-    sha256 = "02dd14c23fac8807a0fac5918d615fa7431b4103696ae77b3ee9f32502fbedf4",
-    strip_prefix = "rllvm-x86_64-unknown-linux-gnu",
-    urls = ["https://github.com/h1994st/rllvm/releases/download/v0.1.6/rllvm-x86_64-unknown-linux-gnu.tar.xz"],
-)
+bazel_dep(name = "rules_testing", version = "0.9.0", dev_dependency = True)
