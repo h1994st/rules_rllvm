@@ -1,0 +1,39 @@
+name: release-please
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      - uses: actions/checkout@v4
+        if: ${{ steps.release.outputs.release_created }}
+        with:
+          fetch-depth: 0
+
+      # The BCR expects a source archive whose checksum is stable. GitHub's
+      # auto-generated tarball is produced on demand and its bytes are not
+      # guaranteed stable, so attach our own and let that be what consumers pin.
+      - name: Attach a stable source archive
+        if: ${{ steps.release.outputs.release_created }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.release.outputs.tag_name }}
+        run: |
+          set -euo pipefail
+          PREFIX="rules_rllvm-${TAG#v}"
+          git archive --format=tar.gz --prefix="${PREFIX}/" -o "${PREFIX}.tar.gz" "${TAG}"
+          sha256sum "${PREFIX}.tar.gz" | tee "${PREFIX}.tar.gz.sha256"
+          gh release upload "${TAG}" "${PREFIX}.tar.gz" "${PREFIX}.tar.gz.sha256" --clobber
