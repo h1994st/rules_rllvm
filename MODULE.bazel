@@ -2,7 +2,7 @@
 
 module(
     name = "rules_rllvm",
-    version = "0.0.1",
+    version = "0.1.0",
     bazel_compatibility = [">=9.0.0"],
 )
 
