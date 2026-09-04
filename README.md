@@ -1,28 +1,26 @@
 # rules_rllvm
 
-Bazel rules that extract whole-program LLVM bitcode from `cc_library`,
-`cc_binary` and `cc_test` targets.
+Bazel rules that extract whole-program LLVM bitcode from `cc_library`, `cc_binary` and `cc_test`.
 
-An aspect shadows the C/C++ dependency graph and declares one bitcode action per
-translation unit, built from the toolchain's own compile command. Actions are
-declared during analysis and executed only when something asks for their
-outputs, so a normal build runs **zero** bitcode actions.
+An aspect shadows the C/C++ dependency graph and declares one bitcode action per translation unit, built from the toolchain's own compile command. Actions execute only when something requests their output, so a normal build runs no bitcode actions. Any node is a valid extraction point — a library is as addressable as a binary.
 
-There is no compiler wrapper. The `clang` drivers are left exactly as the LLVM
-distribution ships them, nothing is injected into object-file sections, and no
-absolute paths are embedded in build outputs. rules_rllvm does not depend on the
-[rllvm](https://github.com/h1994st/rllvm) binary; rllvm continues independently
-as a wllvm/gllvm port for non-Bazel builds.
+There is no compiler wrapper, nothing is injected into object-file sections, and no absolute paths are embedded in build outputs. rules_rllvm does not depend on the [rllvm](https://github.com/h1994st/rllvm) binary, which continues independently as a wllvm/gllvm port for non-Bazel builds.
 
-Bzlmod only — Bazel 9 removed `WORKSPACE`.
+Bzlmod only. Bazel 9 removed `WORKSPACE`.
 
 ## Setup
 
-In your `MODULE.bazel`:
+Add the dependency to `MODULE.bazel`:
+
+<!-- x-release-please-start-version -->
+```starlark
+bazel_dep(name = "rules_rllvm", version = "0.1.0")
+```
+<!-- x-release-please-end -->
+
+Then register the toolchains:
 
 ```starlark
-bazel_dep(name = "rules_rllvm", version = "<version>")
-
 rllvm = use_extension("@rules_rllvm//toolchain:extensions.bzl", "rllvm")
 rllvm.toolchain(
     name = "rllvm_toolchain",
@@ -33,11 +31,10 @@ use_repo(rllvm, "rllvm_toolchain")
 use_repo(rllvm, "rllvm_toolchain_llvm")
 
 register_toolchains("@rllvm_toolchain//:all")
-
-# The bitcode toolchain instance lives in the LLVM distribution repo, which is
-# separate from the cc_toolchain config repo registered above.
 register_toolchains("@rllvm_toolchain_llvm//:bitcode_toolchain")
 ```
+
+The second `register_toolchains` is required: the bitcode toolchain lives in the LLVM distribution repo, which is separate from the cc toolchain config repo.
 
 ## Usage
 
@@ -54,7 +51,7 @@ rllvm_cc_bitcode(
 
 `bazel build //:app_bc` produces `app_bc.bc` and `app_bc.bc.manifest.json`.
 
-Any node is a valid extraction point — a library is as addressable as a binary.
+A rule cannot set its own tags, so a `rllvm_cc_bitcode` target in a normal package is built by `bazel build //...`. Tag it `manual`, or keep these targets in a separate package.
 
 Per-TU bitcode without merging:
 
@@ -62,14 +59,7 @@ Per-TU bitcode without merging:
 bazel build //:app_bc --output_groups=bitcode_files
 ```
 
-**Note:** a rule cannot set its own tags. A `rllvm_cc_bitcode` target in a
-normal package will be built by `bazel build //...`. Tag it `manual` or keep
-these targets in a separate package if you want strictly on-demand behaviour.
-
-Dependencies with no sources (`cc_import`, prebuilt archives, system
-libraries) are excluded from the bitcode and listed in the manifest.
-
-One-off extraction without editing BUILD files:
+One-off extraction without editing BUILD files, at the cost of running the aspect across everything it reaches:
 
 ```
 bazel build //:app \
@@ -77,16 +67,13 @@ bazel build //:app \
   --output_groups=bitcode_files
 ```
 
-Command-line attachment runs the aspect across everything it reaches, so
-prefer the rule for anything repeated.
-
 ## Output groups
 
-| output group | contents |
+| group | contents |
 |---|---|
-| *(default)* | merged module + manifest |
+| *(default)* | merged module and manifest |
 | `bitcode_files` | every per-TU `.bc` in the closure |
-| `modules` | per-node merged modules (staged spine) |
+| `modules` | per-node merged modules |
 | `manifest` | skip record alone |
 
 ## Merge strategies
@@ -94,53 +81,31 @@ prefer the rule for anything repeated.
 | strategy | behaviour |
 |---|---|
 | `flat` | one `llvm-link` over the transitive per-TU bitcode |
-| `staged` | `llvm-link` over per-node modules, so a one-line edit re-merges one library plus the top |
-| `archive` | `llvm-ar` over the transitive per-TU bitcode, for tools that select modules rather than consume one |
+| `staged` | `llvm-link` over per-node modules, so an edit re-merges one library plus the top |
+| `archive` | `llvm-ar` over the transitive per-TU bitcode, for tools that select modules |
 
-Correctness does not depend on the choice — all three consume deduplicated
-depsets — only cost does.
+All three consume deduplicated depsets, so the choice affects cost, not correctness.
 
-## The manifest
+## Manifest
 
-The manifest is a **default output**, not an opt-in group: a record of what is
-missing only does its job if it sits next to the artifact.
+The manifest is a default output rather than an opt-in group, because a record of what is missing only does its job next to the artifact.
 
-A dependency that contributes code to the link but yields no bitcode is a real
-gap and is recorded:
+A dependency that contributes code to the link but yields no bitcode — `cc_import`, a prebuilt archive, a system library — is a real gap and is recorded:
 
 ```json
 {"kind":"cc_library","reason":"no_sources","target":"@@//:asm_only"}
 ```
 
-Header-only libraries contribute no code, so their absence is not a gap and
-they are deliberately **not** recorded — logging them would bury the entries
-that matter.
+Header-only libraries contribute no code, so their absence is not a gap and they are deliberately not recorded.
 
-Missing bitcode is expected and recorded; *broken* bitcode is an error. A
-translation unit that fails to compile, or an `llvm-link` failure, fails the
-build rather than being silently omitted.
-
-## Configuration options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `llvm_version` | `string` | — | LLVM version to download (e.g. `"19.1.0"`) |
-| `llvm_versions` | `dict` | — | Per-(os, arch) LLVM versions, as an alternative to `llvm_version` |
-
-## Supported platforms
-
-Any platform `toolchains_llvm` supports. The old `x86_64-linux` restriction is
-gone: it came from the rllvm binary distribution, which is no longer a
-dependency. Verified on darwin/arm64 and linux/x86_64.
+Missing bitcode is expected and recorded. Broken bitcode is an error: a translation unit that fails to compile, or a failing `llvm-link`, fails the build.
 
 ## Requirements
 
-- Bazel 9 (`.bazelversion` pins `9.0.0`)
-- `toolchains_llvm` >= 1.6.0 — 1.5.0 is incompatible with Bazel 9
+Bazel 9 and `toolchains_llvm` 1.6.0 or later. Any platform `toolchains_llvm` supports; verified on darwin/arm64 and linux/x86_64.
 
-Depends on `toolchains_llvm` internal APIs, so a future `toolchains_llvm`
-release may require updates here.
+rules_rllvm uses `toolchains_llvm` internal APIs, so a future release of it may require updates here.
 
 ## License
 
-See [LICENSE](LICENSE) for details.
+Apache-2.0. See [LICENSE](LICENSE).

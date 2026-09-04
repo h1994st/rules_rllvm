@@ -1,0 +1,71 @@
+name: Bug report
+description: Something does not work
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you expected, and what happened instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Command
+      description: The exact invocation that triggers it, including the target and any output group.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Bazel output
+      description: >
+        Re-run with `--verbose_failures --sandbox_debug`. For a wrong-bitcode
+        report rather than a build failure, `bazel aquery` on the failing target
+        shows the exact compile command the aspect built.
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: rules_rllvm version
+      description: The `bazel_dep` version, or the commit if using an override.
+    validations:
+      required: true
+
+  - type: input
+    id: bazel
+    attributes:
+      label: Bazel version
+      description: "`bazel --version`"
+    validations:
+      required: true
+
+  - type: input
+    id: platform
+    attributes:
+      label: OS and architecture
+      placeholder: macOS 15 arm64 / Ubuntu 24.04 x86_64
+
+  - type: input
+    id: llvm
+    attributes:
+      label: LLVM version
+      description: The `llvm_version` passed to the toolchain extension.
+
+  - type: dropdown
+    id: strategy
+    attributes:
+      label: Merge strategy
+      description: >
+        Worth being precise: flat and staged consume different depsets, so a bug
+        in one often does not reproduce under the other.
+      options:
+        - flat
+        - staged
+        - archive
+        - Not applicable (per-TU bitcode only)
