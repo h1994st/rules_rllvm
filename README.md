@@ -67,6 +67,26 @@ bazel build //:app \
   --output_groups=bitcode_files
 ```
 
+## WebAssembly
+
+Nothing in the aspect is wasm-specific. Each action is built from whichever cc toolchain the platform resolved, so the bitcode follows the target:
+
+```
+bazel build //wasm:app_bc --platforms=@toolchains_llvm//platforms:wasip1-wasm32
+```
+
+wasm targets need a sysroot, which the toolchain takes as its own tag:
+
+```starlark
+rllvm.sysroot(
+    name = "rllvm_toolchain",
+    label = "@wasi_sdk_sysroot//wasm32-wasip1",
+    targets = ["wasip1-wasm32"],
+)
+```
+
+One toolchain covers both the host and wasm: `sysroot` and `stdlib` are keyed by target pair, so wasm entries leave the host defaults alone. See [`examples/wasm/`](examples/wasm/).
+
 ## Output groups
 
 | group | contents |
