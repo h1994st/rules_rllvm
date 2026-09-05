@@ -107,3 +107,26 @@ done
 CRATES=$($BAZEL cquery --output=files //rust:rust_app_bc --output_groups=bitcode_files 2>/dev/null | grep -c '\.crate\.bc$')
 [ "$CRATES" = "2" ] || { echo "FAIL: expected 2 per-crate modules, got $CRATES"; exit 1; }
 echo "PASS: rust crate graph"
+
+# 7. ONE-OFF EXTRACTION: the aspect must expose its files as output groups.
+#
+# Asserting that actions RAN, not that the command exited 0. With no
+# OutputGroupInfo on the aspect, `--output_groups` matches nothing, builds
+# nothing, and still reports success -- so an exit-status check would have
+# passed throughout the entire time this was broken.
+$BAZEL clean >/dev/null 2>&1
+$BAZEL build //:diamond \
+  --aspects=@rules_rllvm//bitcode:aspect.bzl%bitcode_aspect \
+  --output_groups=bitcode_files --execution_log_json_file="$LOG" >/dev/null 2>&1
+N=$(grep -c '"mnemonic": *"CcBitcode' "$LOG" || true)
+[ "$N" -ge 4 ] || { echo "FAIL: one-off extraction ran $N bitcode actions, expected at least 4"; exit 1; }
+
+# The same for Rust, whose aspect had the identical defect.
+$BAZEL clean >/dev/null 2>&1
+$BAZEL build //rust:rust_app \
+  --aspects=@rules_rllvm//rust:aspect.bzl%rust_bitcode_aspect \
+  --output_groups=bitcode_files --execution_log_json_file="$LOG" >/dev/null 2>&1
+RN=$(grep -c '"mnemonic": *"RustBitcode' "$LOG" || true)
+[ "$RN" -ge 2 ] || { echo "FAIL: rust one-off ran $RN bitcode actions, expected at least 2"; exit 1; }
+echo "PASS: one-off extraction"
+

@@ -27,6 +27,21 @@ def _contributes_code(target):
             return True
     return False
 
+def _providers(info):
+    """Pair the provider with the output groups that expose its files.
+
+    Without these, `--aspects=...%bitcode_aspect --output_groups=bitcode_files`
+    matches no group, runs no action and still reports success -- the aspect
+    equivalent of building nothing on purpose.
+    """
+    return [
+        info,
+        OutputGroupInfo(
+            bitcode_files = info.tu_bitcode,
+            modules = info.modules,
+        ),
+    ]
+
 def _bitcode_aspect_impl(target, ctx):
     deps = getattr(ctx.rule.attr, "deps", []) + \
            getattr(ctx.rule.attr, "implementation_deps", [])
@@ -37,7 +52,7 @@ def _bitcode_aspect_impl(target, ctx):
     transitive_man = [d.manifest for d in dep_infos]
 
     if CcInfo not in target:
-        return [BitcodeInfo(
+        return _providers(BitcodeInfo(
             tu_bitcode = depset(transitive = transitive_tu),
             module = None,
             modules = depset(transitive = transitive_mod),
@@ -45,7 +60,7 @@ def _bitcode_aspect_impl(target, ctx):
                 direct = [_skip_record(target.label, "no_ccinfo", ctx.rule.kind)],
                 transitive = transitive_man,
             ),
-        )]
+        ))
 
     srcs = []
     for s in getattr(ctx.rule.attr, "srcs", []):
@@ -57,12 +72,12 @@ def _bitcode_aspect_impl(target, ctx):
         direct_man = []
         if _contributes_code(target):
             direct_man = [_skip_record(target.label, "no_sources", ctx.rule.kind)]
-        return [BitcodeInfo(
+        return _providers(BitcodeInfo(
             tu_bitcode = depset(transitive = transitive_tu),
             module = None,
             modules = depset(transitive = transitive_mod),
             manifest = depset(direct = direct_man, transitive = transitive_man),
-        )]
+        ))
 
     cc_toolchain = find_cc_toolchain(ctx)
     feature_config = cc_common.configure_features(
@@ -94,12 +109,12 @@ def _bitcode_aspect_impl(target, ctx):
         progress_message = "Merging bitcode module for %s" % ctx.label,
     )
 
-    return [BitcodeInfo(
+    return _providers(BitcodeInfo(
         tu_bitcode = depset(direct = tu_files, transitive = transitive_tu),
         module = module,
         modules = depset(direct = [module], transitive = transitive_mod),
         manifest = depset(transitive = transitive_man),
-    )]
+    ))
 
 bitcode_aspect = aspect(
     implementation = _bitcode_aspect_impl,

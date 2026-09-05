@@ -31,6 +31,21 @@ load("//bitcode:providers.bzl", "BitcodeInfo")
 # reasoning as header-only libraries in the cc aspect.
 _HOST_CRATE_TYPES = ["proc-macro"]
 
+def _providers(info):
+    """Pair the provider with the output groups that expose its files.
+
+    Without these, `--aspects=...%rust_bitcode_aspect
+    --output_groups=bitcode_files` matches no group, runs no action and still
+    reports success.
+    """
+    return [
+        info,
+        OutputGroupInfo(
+            bitcode_files = info.tu_bitcode,
+            modules = info.modules,
+        ),
+    ]
+
 def _skip_record(label, reason, kind):
     return json.encode({"target": str(label), "reason": reason, "kind": kind})
 
@@ -51,12 +66,12 @@ def _rust_bitcode_aspect_impl(target, ctx):
     transitive_man = [d.manifest for d in dep_infos]
 
     def _passthrough(direct_man = []):
-        return [BitcodeInfo(
+        return _providers(BitcodeInfo(
             tu_bitcode = depset(transitive = transitive_tu),
             module = None,
             modules = depset(transitive = transitive_mod),
             manifest = depset(direct = direct_man, transitive = transitive_man),
-        )]
+        ))
 
     crate = _crate_info(target)
     if crate == None:
@@ -141,12 +156,12 @@ def _rust_bitcode_aspect_impl(target, ctx):
         toolchain = "@rules_rust//rust:toolchain_type",
     )
 
-    return [BitcodeInfo(
+    return _providers(BitcodeInfo(
         tu_bitcode = depset(direct = [bc], transitive = transitive_tu),
         module = bc,
         modules = depset(direct = [bc], transitive = transitive_mod),
         manifest = depset(transitive = transitive_man),
-    )]
+    ))
 
 rust_bitcode_aspect = aspect(
     implementation = _rust_bitcode_aspect_impl,
