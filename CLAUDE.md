@@ -12,6 +12,7 @@ Bazel rules that extract whole-program LLVM bitcode from `cc_library`, `cc_binar
 | `bitcode/providers.bzl` | `BitcodeInfo`, source classification |
 | `bitcode/toolchain.bzl` | supplies `llvm-link` and `llvm-ar` |
 | `toolchain/` | LLVM download, bzlmod extension, toolchain registration |
+| `examples/wasm/` | wasm32-wasip1 fixture and its WASI sysroot |
 | `examples/` | diamond fixture and invariant tests |
 
 ## Build and test
@@ -38,5 +39,7 @@ One long-lived branch, `main`, with temporary feature branches merged by squash 
 **`CcInfo` and `cc_common` come from `rules_cc`, not from Bazel globals.** Bazel 9 removed them. A missing load surfaces as a loud error in a rule attribute but as a *silently false* membership test inside the aspect, which yields empty bitcode rather than a failure.
 
 **The bitcode toolchain is registered separately from the cc toolchain.** It lives in the LLVM distribution repo, not the cc_toolchain config repo, so a single `register_toolchains` line covering the latter does not reach it.
+
+**Cross-compilation needs no code here, so the test asserts the triple.** A host-targeted module builds and links exactly as a wasm one does, so "the build succeeded" would pass while the wrong thing was extracted. `examples/tests/bitcode_test.sh` reads the target triple back out of the merged module instead.
 
 **A rule cannot set its own tags.** `rllvm_cc_bitcode` targets are built by a wildcard build unless the caller tags them `manual`; this is documented in the README rather than worked around.

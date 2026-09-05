@@ -58,3 +58,28 @@ grep -q '"reason":"no_sources"' "$MAN" || {
   echo "FAIL: skip record is missing its reason"; exit 1
 }
 echo "PASS: skip recording"
+
+# 5. WASM: the merged module must carry the wasm triple, not the host's.
+#
+# Asserting the triple rather than that the build succeeded is the whole point:
+# a host-targeted module also builds and also links, so "it worked" would pass
+# while extracting the wrong thing. The aspect has no wasm-specific code, so
+# the triple is evidence that it took the command line from whichever cc
+# toolchain the platform resolved.
+WASM_PLATFORM="@toolchains_llvm//platforms:wasip1-wasm32"
+$BAZEL build //wasm:wasm_app_bc --platforms="$WASM_PLATFORM" >/dev/null 2>&1
+WBC=$($BAZEL cquery --output=files //wasm:wasm_app_bc --platforms="$WASM_PLATFORM" 2>/dev/null | grep '\.bc$')
+DIS=$(echo "$($BAZEL info output_base)"/external/*llvm_toolchain_llvm/bin/llvm-dis)
+TRIPLE=$("$DIS" -o - "$WBC" | grep -m1 '^target triple')
+case "$TRIPLE" in
+  *wasm32*) ;;
+  *) echo "FAIL: wasm module has triple '$TRIPLE', expected wasm32"; exit 1 ;;
+esac
+
+# Both translation units must be there, or the aspect stopped at the top node
+# under the platform transition.
+WSYMS=$("$NM" "$WBC")
+for s in rllvm_wasm_value main; do
+  echo "$WSYMS" | grep -q "$s" || { echo "FAIL: wasm module missing symbol $s"; exit 1; }
+done
+echo "PASS: wasm target triple"

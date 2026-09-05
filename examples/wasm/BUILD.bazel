@@ -1,0 +1,23 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@rules_rllvm//bitcode:defs.bzl", "rllvm_cc_bitcode")
+
+# Built with `--platforms=@toolchains_llvm//platforms:wasip1-wasm32`. The aspect
+# needs no wasm-specific code: it builds each compile action from whichever cc
+# toolchain resolved, so the target triple follows the platform.
+cc_library(
+    name = "wasm_lib",
+    srcs = ["wasm_lib.c"],
+    hdrs = ["wasm_lib.h"],
+)
+
+cc_binary(
+    name = "wasm_app",
+    srcs = ["wasm_app.c"],
+    deps = [":wasm_lib"],
+)
+
+rllvm_cc_bitcode(
+    name = "wasm_app_bc",
+    tags = ["manual"],
+    target = ":wasm_app",
+)

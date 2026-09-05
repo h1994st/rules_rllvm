@@ -3,6 +3,7 @@
 module(name = "rules_rllvm_examples")
 
 bazel_dep(name = "rules_cc", version = "0.2.14")
+bazel_dep(name = "toolchains_llvm", version = "1.6.0")
 bazel_dep(name = "rules_rllvm")
 local_path_override(
     module_name = "rules_rllvm",
@@ -12,7 +13,19 @@ local_path_override(
 rllvm = use_extension("@rules_rllvm//toolchain:extensions.bzl", "rllvm")
 rllvm.toolchain(
     name = "rllvm_toolchain",
+    libclang_rt = {
+        "@libclang_rt_wasm32//:libclang_rt.builtins-wasm32.a": "wasm32-unknown-wasip1/libclang_rt.builtins.a",
+    },
     llvm_version = "19.1.0",
+    stdlib = {"wasip1-wasm32": "libc"},
+)
+
+# One toolchain instance serves both the host and wasm: sysroot and stdlib are
+# keyed by target pair, so the wasm entries leave the host defaults alone.
+rllvm.sysroot(
+    name = "rllvm_toolchain",
+    label = "@wasi_sdk_sysroot//wasm32-wasip1",
+    targets = ["wasip1-wasm32"],
 )
 
 use_repo(rllvm, "rllvm_toolchain")
@@ -23,3 +36,11 @@ register_toolchains("@rllvm_toolchain//:all")
 # The bitcode toolchain instance lives in the LLVM distribution repo, which is
 # a separate repo from the cc_toolchain config repo registered above.
 register_toolchains("@rllvm_toolchain_llvm//:bitcode_toolchain")
+
+wasi_sdk_sysroot = use_repo_rule("//wasm:wasi_sdk.bzl", "wasi_sdk_sysroot")
+
+wasi_sdk_sysroot(name = "wasi_sdk_sysroot")
+
+libclang_rt_wasm32 = use_repo_rule("//wasm:wasi_sdk.bzl", "libclang_rt_wasm32")
+
+libclang_rt_wasm32(name = "libclang_rt_wasm32")
