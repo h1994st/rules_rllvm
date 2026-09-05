@@ -1,0 +1,21 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
+load("@rules_rllvm//rust:defs.bzl", "rllvm_rust_bitcode")
+
+rust_library(
+    name = "rllvm_rust_lib",
+    srcs = ["src/lib.rs"],
+    edition = "2021",
+)
+
+rust_binary(
+    name = "rust_app",
+    srcs = ["src/main.rs"],
+    edition = "2021",
+    deps = [":rllvm_rust_lib"],
+)
+
+rllvm_rust_bitcode(
+    name = "rust_app_bc",
+    tags = ["manual"],
+    target = ":rust_app",
+)
