@@ -22,7 +22,7 @@ if grep -q '"mnemonic": *"CcBitcode' "$LOG"; then
 fi
 
 $BAZEL build //... --execution_log_json_file="$LOG" >/dev/null 2>&1
-if grep -q '"mnemonic": *"CcBitcode' "$LOG"; then
+if grep -qE '"mnemonic": *"(CcBitcode|RustBitcode)' "$LOG"; then
   echo "FAIL: bitcode actions ran during a wildcard build"; exit 1
 fi
 echo "PASS: laziness"
@@ -83,3 +83,27 @@ for s in rllvm_wasm_value main; do
   echo "$WSYMS" | grep -q "$s" || { echo "FAIL: wasm module missing symbol $s"; exit 1; }
 done
 echo "PASS: wasm target triple"
+
+# 6. RUST: same laziness and same merge, over a crate graph instead of a
+# translation-unit graph.
+$BAZEL clean >/dev/null 2>&1
+$BAZEL build //rust:rust_app --execution_log_json_file="$LOG" >/dev/null 2>&1
+if grep -q '"mnemonic": *"RustBitcode' "$LOG"; then
+  echo "FAIL: bitcode actions ran while building //rust:rust_app"; exit 1
+fi
+
+$BAZEL build //rust:rust_app_bc >/dev/null 2>&1
+RBC=$($BAZEL cquery --output=files //rust:rust_app_bc 2>/dev/null | grep '\.bc$')
+RSYMS=$("$NM" --defined-only "$RBC")
+
+# Rust mangles symbols, but the crate and function names survive inside the
+# mangled form, so both crates being present is still checkable by name.
+for s in rllvm_rust_value rust_app; do
+  echo "$RSYMS" | grep -q "$s" || { echo "FAIL: rust module missing $s"; exit 1; }
+done
+
+# One .bc per crate, not one for the whole graph: the merge is what combines
+# them, exactly as with C++ translation units.
+CRATES=$($BAZEL cquery --output=files //rust:rust_app_bc --output_groups=bitcode_files 2>/dev/null | grep -c '\.crate\.bc$')
+[ "$CRATES" = "2" ] || { echo "FAIL: expected 2 per-crate modules, got $CRATES"; exit 1; }
+echo "PASS: rust crate graph"

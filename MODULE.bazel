@@ -11,4 +11,10 @@ bazel_dep(name = "rules_cc", version = "0.2.14")
 bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "toolchains_llvm", version = "1.6.0")
 
+# Rust support is opt-in at the load level: nothing here is reachable unless a
+# user loads //rust:defs.bzl, so a cc-only build never registers a Rust
+# toolchain. The dep itself has to be non-dev, or the load would fail for
+# anyone depending on rules_rllvm.
+bazel_dep(name = "rules_rust", version = "0.74.0")
+
 bazel_dep(name = "rules_testing", version = "0.9.0", dev_dependency = True)

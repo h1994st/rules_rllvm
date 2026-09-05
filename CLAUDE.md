@@ -11,6 +11,8 @@ Bazel rules that extract whole-program LLVM bitcode from `cc_library`, `cc_binar
 | `bitcode/compile.bzl` | one `.bc` per translation unit |
 | `bitcode/providers.bzl` | `BitcodeInfo`, source classification |
 | `bitcode/toolchain.bzl` | supplies `llvm-link` and `llvm-ar` |
+| `bitcode/merge.bzl` | merge step shared by the cc and Rust rules |
+| `rust/` | the crate-graph aspect and `rllvm_rust_bitcode` |
 | `toolchain/` | LLVM download, bzlmod extension, toolchain registration |
 | `examples/wasm/` | wasm32-wasip1 fixture and its WASI sysroot |
 | `examples/` | diamond fixture and invariant tests |
@@ -39,6 +41,10 @@ One long-lived branch, `main`, with temporary feature branches merged by squash 
 **`CcInfo` and `cc_common` come from `rules_cc`, not from Bazel globals.** Bazel 9 removed them. A missing load surfaces as a loud error in a rule attribute but as a *silently false* membership test inside the aspect, which yields empty bitcode rather than a failure.
 
 **The bitcode toolchain is registered separately from the cc toolchain.** It lives in the LLVM distribution repo, not the cc_toolchain config repo, so a single `register_toolchains` line covering the latter does not reach it.
+
+**The Rust aspect asks `rules_rust` for the command it would already have run.** `construct_arguments` is how every rustc invocation in that ruleset is built, so borrowing it and changing only `--emit` keeps the bitcode in step with the features, `--extern` paths and flags of the real compile. Re-deriving that command would drift silently. This is the same bargain as the `toolchains_llvm` internals: an upstream release can require updates here.
+
+**Rust bitcode needs exactly one codegen unit.** With more than one, rustc reports `ignoring emit path because multiple .bc files were produced` and writes none of them where the action declared its output. `rules_rust` forces a single unit for `obj` but not for `llvm-bc`, so the aspect sets it after `construct_arguments`, where it wins.
 
 **Cross-compilation needs no code here, so the test asserts the triple.** A host-targeted module builds and links exactly as a wasm one does, so "the build succeeded" would pass while the wrong thing was extracted. `examples/tests/bitcode_test.sh` reads the target triple back out of the merged module instead.
 

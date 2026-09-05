@@ -87,6 +87,24 @@ rllvm.sysroot(
 
 One toolchain covers both the host and wasm: `sysroot` and `stdlib` are keyed by target pair, so wasm entries leave the host defaults alone. See [`examples/wasm/`](examples/wasm/).
 
+## Rust
+
+```starlark
+load("@rules_rllvm//rust:defs.bzl", "rllvm_rust_bitcode")
+
+rllvm_rust_bitcode(
+    name = "app_bc",
+    target = ":app",
+    tags = ["manual"],
+)
+```
+
+Output groups and merge strategies match the cc rule. One crate is already one module, so `flat` and `staged` differ only where a crate graph also reaches C/C++ targets.
+
+Loading `//rust:defs.bzl` is what pulls `rules_rust` into a build. A project that extracts only C/C++ bitcode never loads it and never registers a Rust toolchain.
+
+The Rust standard library is not in the extracted module. `std` arrives as precompiled rlibs rather than as a Bazel dependency, so the aspect never sees it and cannot record it as a gap either. Reaching it would need a `-Zbuild-std` toolchain.
+
 ## Output groups
 
 | group | contents |
