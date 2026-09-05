@@ -1,0 +1,38 @@
+# Jekyll configuration for the project site at https://shengtuo.me/rules_rllvm.
+#
+# `index.md` is generated from README.md by `build.py` and is not committed, so
+# the published page cannot drift from the repository's front page.
+#
+# There is deliberately no CNAME file in this repository. The user site
+# (h1994st.github.io) owns `shengtuo.me`, and project pages inherit it as
+# `shengtuo.me/<repo>` automatically. A CNAME here would claim the apex domain
+# for this project and take the personal site down with it.
+title: rules_rllvm
+# Plain prose, not the README's tagline: this is copied verbatim into meta
+# tags, where backticks would be shown rather than rendered.
+description: Bazel rules that extract whole-program LLVM bitcode from cc_library, cc_binary and cc_test.
+lang: en
+
+url: https://shengtuo.me
+baseurl: /rules_rllvm
+
+repository: h1994st/rules_rllvm
+
+# GitHub renders and keeps this card current, so there is no image asset to
+# regenerate whenever the repository description changes.
+image: https://opengraph.githubassets.com/1/h1994st/rules_rllvm
+twitter:
+  card: summary_large_image
+
+# No `theme`: the layout in `_layouts/` is the design.
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+exclude:
+  - build.py

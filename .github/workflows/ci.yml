@@ -1,18 +1,106 @@
 name: CI
 
+# No `paths-ignore`: these jobs are required status checks on `main`, and a
+# required check whose workflow never runs leaves a pull request waiting on a
+# status that will never arrive.
+#
+# So the jobs always run and the work inside them is conditional instead. A
+# documentation-only change still reports every check green, having skipped the
+# LLVM download, the builds and the bitcode assertions -- the parts that cost
+# minutes. It pays runner startup and nothing else.
+#
+# The guards sit on steps rather than on jobs on purpose. A job-level `if:`
+# reports the check as "skipped", and a skipped required check counts as
+# passing -- which would wave code through untested.
+#
+# For the same reason the guards read `!= 'false'` rather than `== 'true'`, and
+# the jobs run with `always()`: if the classifier itself fails, its output is
+# empty, and empty is not "false", so everything builds. The unknown case has
+# to fall on the safe side.
+#
+# Do not rename these jobs or give them a `name:`. The branch ruleset requires
+# the contexts `build`, `bitcode (ubuntu-latest)` and `bitcode (macos-latest)`
+# by exact string, and a renamed job reports under the new name while the
+# required one never arrives -- which blocks every pull request on a status
+# that cannot come.
 on:
   push:
-    branches: [main, dev]
+    branches: [main]
+  # Every pull request, not just those targeting `main`. A stacked pull request
+  # opened against another branch still has to be tested before its base moves.
   pull_request:
-    branches: [main, dev]
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.classify.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Classify the changed files
+        id: classify
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            files=$(gh api --paginate \
+              "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" \
+              -q '.[].filename')
+          else
+            before="${{ github.event.before }}"
+            # A new branch or a force push leaves no usable base to diff from.
+            if [ -z "$before" ] \
+              || [ "$before" = "0000000000000000000000000000000000000000" ] \
+              || ! git cat-file -e "$before^{commit}" 2>/dev/null; then
+              echo "code=true" >> "$GITHUB_OUTPUT"
+              echo "No comparable base commit, so everything runs."
+              exit 0
+            fi
+            files=$(git diff --name-only "$before" "${{ github.sha }}")
+          fi
+
+          echo "Changed files:"
+          echo "$files" | sed 's/^/  /'
+
+          # Only paths that cannot reach the Bazel build are listed. Anything
+          # else -- including this workflow -- forces the full run, so a path
+          # nobody thought about fails safe.
+          #
+          # MODULE.bazel is deliberately absent despite feeding the site's
+          # version: it is also where every dependency is declared.
+          code=false
+          while IFS= read -r file; do
+            [ -n "$file" ] || continue
+            case "$file" in
+              *.md | site/* | .github/ISSUE_TEMPLATE/* \
+                | .github/PULL_REQUEST_TEMPLATE.md \
+                | .github/workflows/pages.yml | LICENSE) ;;
+              *)
+                code=true
+                break
+                ;;
+            esac
+          done <<< "$files"
+
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "Builds and tests run: $code"
+
   build:
+    needs: changes
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        if: needs.changes.outputs.code != 'false'
 
       - name: Setup Bazelisk
+        if: needs.changes.outputs.code != 'false'
         uses: bazel-contrib/setup-bazel@0.14.0
         with:
           bazelisk-cache: true
@@ -20,15 +108,20 @@ jobs:
           repository-cache: true
 
       - name: Build rules
+        if: needs.changes.outputs.code != 'false'
         run: bazel build //...
 
       - name: Run analysis tests
+        if: needs.changes.outputs.code != 'false'
         run: bazel test //bitcode/tests:all
 
       - name: Build examples
+        if: needs.changes.outputs.code != 'false'
         run: cd examples && bazel build //...
 
   bitcode:
+    needs: changes
+    if: always()
     strategy:
       fail-fast: false
       matrix:
@@ -36,8 +129,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        if: needs.changes.outputs.code != 'false'
 
       - name: Setup Bazelisk
+        if: needs.changes.outputs.code != 'false'
         uses: bazel-contrib/setup-bazel@0.14.0
         with:
           bazelisk-cache: true
@@ -45,7 +140,9 @@ jobs:
           repository-cache: true
 
       - name: Build diamond bitcode
+        if: needs.changes.outputs.code != 'false'
         run: cd examples && bazel build //:diamond_bc
 
       - name: Assert laziness, content, dedup, skips
+        if: needs.changes.outputs.code != 'false'
         run: cd examples && BAZEL=bazel ./tests/bitcode_test.sh

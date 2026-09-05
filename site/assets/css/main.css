@@ -1,0 +1,598 @@
+/* rules_rllvm — project site
+ *
+ * The palette, type and spacing are shared with the rllvm project site: the
+ * two are siblings under one domain and reading as one system is the point.
+ *
+ * Cool ground, one warm accent. The accent marks exactly one idea: the single
+ * module that comes out of a build. Nothing else borrows it.
+ *
+ * Monospace is reserved for machine text — labels, paths, code, target
+ * patterns. It is never used to style a word that is merely prose.
+ */
+
+:root {
+  --paper: #fafbfd;
+  --raised: #f1f4f9;
+  --ink: #0e1420;
+  --muted: #59647a;
+  --rule: #e2e7f0;
+  --accent: #b26a00;
+  --syn-comment: #6b7689;
+  --syn-string: #0f766e;
+  --syn-key: #6d28d9;
+
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono",
+    Menlo, Consolas, monospace;
+
+  --measure: 68ch;
+  --gutter: clamp(1.25rem, 5vw, 3.5rem);
+  /* Keeps the measure honest on wide displays without centering the text. */
+  --shelf: max(var(--gutter), (100% - 82rem) / 2);
+
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --paper: #0b0f17;
+  --raised: #131926;
+  --ink: #e3e9f4;
+  --muted: #8c97ac;
+  --rule: #1e2635;
+  --accent: #f0a202;
+  --syn-comment: #6f7c92;
+  --syn-string: #5eead4;
+  --syn-key: #c4b5fd;
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="auto"] {
+    --paper: #0b0f17;
+    --raised: #131926;
+    --ink: #e3e9f4;
+    --muted: #8c97ac;
+    --rule: #1e2635;
+    --accent: #f0a202;
+    --syn-comment: #6f7c92;
+    --syn-string: #5eead4;
+    --syn-key: #c4b5fd;
+
+    color-scheme: dark;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: color-mix(in srgb, var(--muted) 55%, transparent);
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  text-decoration-color: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: var(--gutter);
+  top: 0.75rem;
+  z-index: 10;
+  background: var(--paper);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  padding: 0.85rem var(--shelf);
+  background: color-mix(in srgb, var(--paper) 82%, transparent);
+  backdrop-filter: saturate(1.6) blur(12px);
+  border-bottom: 1px solid var(--rule);
+}
+
+.wordmark {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.version {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 0.05rem 0.5rem;
+}
+
+.masthead nav {
+  margin-left: auto;
+  min-width: 0;
+  display: flex;
+  gap: 1.1rem;
+  font-size: 0.92rem;
+}
+
+.theme {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  cursor: pointer;
+}
+
+.theme:hover {
+  color: var(--ink);
+  border-color: var(--muted);
+}
+
+/* The row is the tightest thing on the page; shed the least useful parts
+   before it wraps. Releases first, then the version. */
+@media (max-width: 34rem) {
+  .masthead nav a:nth-child(3) {
+    display: none;
+  }
+}
+
+@media (max-width: 26rem) {
+  .version {
+    display: none;
+  }
+}
+
+/* ---------- hero ---------- */
+
+.hero > * {
+  min-width: 0;
+}
+
+.hero {
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+  padding: clamp(3rem, 8vw, 5.5rem) var(--shelf) clamp(2.5rem, 6vw, 4rem);
+  border-bottom: 1px solid var(--rule);
+}
+
+@media (min-width: 60rem) {
+  .hero {
+    grid-template-columns: 1.05fr 0.95fr;
+  }
+}
+
+.pitch h1 {
+  margin: 0;
+  font-size: clamp(1.75rem, 3.6vw, 2.3rem);
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.022em;
+  /* Wide for a display line, because the tagline is a full sentence carrying
+     three rule names rather than a slogan. Narrower and it stacks five deep. */
+  max-width: 30ch;
+}
+
+/* The rule names in the headline are machine text, so they are set as such.
+   No chip or background: at this size the tint would read as a button. */
+.pitch h1 code {
+  font-family: var(--font-mono);
+  font-size: 0.76em;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.lead {
+  margin: 1.1rem 0 0;
+  max-width: 52ch;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+/* `width: fit-content` keeps the box hugging its contents the way a short
+   shell command would; `max-width` stops the long dep line from widening the
+   hero, and the code scrolls inside instead. */
+.install {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 1.9rem;
+  padding: 0.55rem 0.6rem 0.55rem 0.95rem;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--raised);
+}
+
+.install code {
+  font-family: var(--font-mono);
+  font-size: 0.94rem;
+  white-space: nowrap;
+  /* `overflow-x` is what lets this shrink: a scroll container's automatic
+     minimum size is zero, so the long dep line scrolls instead of widening
+     the page on a phone. */
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.install button {
+  flex: none;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--muted);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  cursor: pointer;
+}
+
+.install button:hover {
+  color: var(--ink);
+}
+
+/* ---------- the graph ---------- */
+
+/* The diamond from `examples/`. Each box is one aspect node: the target above,
+   the module it merges from its own sources below. Both paths down the graph
+   end at the same `lib_c` box, which is the whole reason the fixture is a
+   diamond — depsets deduplicate, so `llvm-link` sees `lib_c.bc` once. */
+
+.graph {
+  margin: 0;
+  max-width: min(30rem, 100%);
+  font-family: var(--font-mono);
+}
+
+@media (min-width: 60rem) {
+  .graph {
+    padding-top: 0.7rem;
+  }
+}
+
+.graph svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* Dashed, because these edges are declared during analysis and carry nothing
+   until an output group asks for it. */
+.graph .edges line {
+  /* Not `--rule`: a hairline that reads fine as a border disappears as a
+     diagonal, and in dark it vanished entirely against the ground. */
+  stroke: color-mix(in srgb, var(--muted) 50%, transparent);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+  stroke-linecap: round;
+}
+
+.graph .node rect {
+  fill: var(--raised);
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.graph text {
+  font-family: var(--font-mono);
+  text-anchor: middle;
+}
+
+.graph .target {
+  fill: var(--ink);
+  font-size: 13px;
+}
+
+.graph .bc {
+  fill: var(--muted);
+  font-size: 11px;
+}
+
+.graph .node,
+.graph .edges {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: enter 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 90ms);
+}
+
+.graph .edges {
+  animation-duration: 0.7s;
+  animation-delay: 150ms;
+}
+
+.graph figcaption {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+  animation: enter 0.6s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation-delay: 420ms;
+}
+
+.graph .cmd {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.graph .out {
+  color: var(--accent);
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .graph .node,
+  .graph .edges,
+  .graph figcaption {
+    animation: none;
+  }
+}
+
+/* ---------- shell ---------- */
+
+.shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 3rem;
+  padding: clamp(2.5rem, 6vw, 4rem) var(--shelf) 4rem;
+}
+
+@media (min-width: 74rem) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr) 13rem;
+  }
+
+  .prose {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .rail {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+.prose,
+.rail {
+  min-width: 0;
+}
+
+/* Below the two-column breakpoint the rail has no column of its own, and in
+   one column it lands above the first paragraph -- a table of contents ahead
+   of any content it could refer to. */
+@media (max-width: 73.999rem) {
+  .rail {
+    display: none;
+  }
+}
+
+.rail nav {
+  position: sticky;
+  top: 5rem;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.88rem;
+  border-left: 1px solid var(--rule);
+  padding-left: 1rem;
+}
+
+.rail a {
+  color: var(--muted);
+  text-decoration: none;
+  padding: 0.05rem 0;
+}
+
+.rail a:hover,
+.rail a[aria-current="true"] {
+  color: var(--ink);
+}
+
+.rail a.sub {
+  padding-left: 0.85rem;
+  font-size: 0.84rem;
+}
+
+/* ---------- prose ---------- */
+
+.prose {
+  max-width: var(--measure);
+}
+
+.prose > * {
+  margin-inline: 0;
+}
+
+.prose h2 {
+  margin: 3.2rem 0 1rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--rule);
+  font-size: clamp(1.4rem, 2.4vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  line-height: 1.2;
+}
+
+.prose > h2:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.prose h3 {
+  margin: 2.2rem 0 0.7rem;
+  font-size: 1.12rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.prose p,
+.prose ul,
+.prose ol {
+  margin: 0 0 1.1rem;
+}
+
+.prose li {
+  margin-bottom: 0.45rem;
+}
+
+.prose li::marker {
+  color: var(--muted);
+}
+
+.prose strong {
+  font-weight: 600;
+}
+
+/* Tight horizontal padding: the prose ends sentences on a code span often
+   enough that a roomier chip puts a visible gap before the full stop. */
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--raised);
+  border-radius: 4px;
+  padding: 0.12em 0.26em;
+}
+
+.prose pre {
+  margin: 0 0 1.4rem;
+  padding: 1rem 1.15rem;
+  background: var(--raised);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow-x: auto;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.prose pre code {
+  background: none;
+  padding: 0;
+  font-size: 1em;
+}
+
+.prose table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 0 0 1.4rem;
+  font-size: 0.94rem;
+}
+
+.prose th,
+.prose td {
+  text-align: left;
+  padding: 0.5rem 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+
+.prose th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.prose blockquote {
+  margin: 0 0 1.2rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--rule);
+  color: var(--muted);
+}
+
+.prose hr {
+  margin: 2.5rem 0;
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+/* Rouge, kept to three ideas: what is not code, what is text, what is named. */
+.highlight .c, .highlight .c1, .highlight .cm, .highlight .cd {
+  color: var(--syn-comment);
+  font-style: italic;
+}
+
+.highlight .s, .highlight .s1, .highlight .s2, .highlight .sb, .highlight .se {
+  color: var(--syn-string);
+}
+
+.highlight .k, .highlight .kd, .highlight .kn, .highlight .kr, .highlight .nb,
+.highlight .nt {
+  color: var(--syn-key);
+}
+
+.highlight .nv, .highlight .na, .highlight .no, .highlight .m, .highlight .mi {
+  color: var(--accent);
+}
+
+/* ---------- footer ---------- */
+
+footer {
+  border-top: 1px solid var(--rule);
+  padding: 2rem var(--shelf) 3rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+footer p {
+  margin: 0;
+  max-width: var(--measure);
+}
