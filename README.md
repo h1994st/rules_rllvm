@@ -14,7 +14,7 @@ Add the dependency to `MODULE.bazel`:
 
 <!-- x-release-please-start-version -->
 ```starlark
-bazel_dep(name = "rules_rllvm", version = "0.1.0")
+bazel_dep(name = "rules_rllvm", version = "0.1.1")
 ```
 <!-- x-release-please-end -->
 

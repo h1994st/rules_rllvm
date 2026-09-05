@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.1](https://github.com/h1994st/rules_rllvm/compare/v0.1.0...v0.1.1) (2026-09-05)
+
+
+### Features
+
+* extract bitcode from Rust crates ([#31](https://github.com/h1994st/rules_rllvm/issues/31)) ([9a49255](https://github.com/h1994st/rules_rllvm/commit/9a49255a0d9dd57cd8afd90b721df32c3871be8b))
+* support wasm targets via platform resolution ([#29](https://github.com/h1994st/rules_rllvm/issues/29)) ([f812042](https://github.com/h1994st/rules_rllvm/commit/f812042ca01c910c90f7dd66caf0b657128a668e))
+
+
+### Bug Fixes
+
+* expose aspect output groups so one-off extraction works ([#32](https://github.com/h1994st/rules_rllvm/issues/32)) ([9b03d81](https://github.com/h1994st/rules_rllvm/commit/9b03d81282e8984254890526120c830ff8bdb5d4))
+
 ## [0.1.0](https://github.com/h1994st/rules_rllvm/compare/v0.0.1...v0.1.0) (2026-09-03)
 
 
