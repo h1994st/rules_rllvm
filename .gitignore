@@ -3,6 +3,10 @@
 !/examples/.bazelversion
 MODULE.bazel.lock
 
+# Generated from README.md by site/build.py; never committed, so the
+# published page cannot drift from the repository's front page.
+site/index.md
+
 ### Claude Code ###
 settings.local.json
 .worktrees/
