@@ -71,9 +71,6 @@ jobs:
           # Only paths that cannot reach the Bazel build are listed. Anything
           # else -- including this workflow -- forces the full run, so a path
           # nobody thought about fails safe.
-          #
-          # MODULE.bazel is deliberately absent despite feeding the site's
-          # version: it is also where every dependency is declared.
           code=false
           while IFS= read -r file; do
             [ -n "$file" ] || continue

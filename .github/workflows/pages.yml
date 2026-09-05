@@ -4,16 +4,19 @@ name: Pages
 # workflow is not a required status check, so a pull request that never runs it
 # is still mergeable.
 #
-# MODULE.bazel is in the list because the hero's `bazel_dep` line and the
-# version in the header are read from it. Without it a release would bump the
-# module and leave the published page advertising the previous version.
+# The release-please manifest is in the list because the hero's `bazel_dep`
+# line and the version in the header are read from it. Without it a release
+# would leave the published page advertising the previous version. It changes
+# only when a release lands, which is why it is here and MODULE.bazel is not:
+# that file also carries every dependency, and a dependency bump changes
+# nothing on the page.
 on:
   push:
     branches: ["main"]
-    paths: ["README.md", "MODULE.bazel", "site/**", ".github/workflows/pages.yml"]
+    paths: ["README.md", ".release-please-manifest.json", "site/**", ".github/workflows/pages.yml"]
   pull_request:
     branches: ["main"]
-    paths: ["README.md", "MODULE.bazel", "site/**", ".github/workflows/pages.yml"]
+    paths: ["README.md", ".release-please-manifest.json", "site/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
