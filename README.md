@@ -99,6 +99,14 @@ rllvm_rust_bitcode(
 )
 ```
 
+One-off extraction works the same way, with the crate aspect:
+
+```
+bazel build //:app \
+  --aspects=@rules_rllvm//rust:aspect.bzl%rust_bitcode_aspect \
+  --output_groups=bitcode_files
+```
+
 Output groups and merge strategies match the cc rule. One crate is already one module, so `flat` and `staged` differ only where a crate graph also reaches C/C++ targets.
 
 Loading `//rust:defs.bzl` is what pulls `rules_rust` into a build. A project that extracts only C/C++ bitcode never loads it and never registers a Rust toolchain.
