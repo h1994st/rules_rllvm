@@ -14,12 +14,18 @@ Four things change on the way:
   nowhere else on the page.
 * Relative links work on github.com and 404 on the site, which has no
   `examples/` or `LICENSE` to serve.
-* The version is read from MODULE.bazel, so neither the header nor the
-  `bazel_dep` line in the hero can claim a release that was never cut.
+* The version is read from the release-please manifest, so neither the header
+  nor the `bazel_dep` line in the hero can claim a release that was never cut.
+  That file is release-please's own record of what it last published, which
+  makes it the thing a reader of the page is actually asking about. MODULE.bazel
+  carries the same number, but it also carries every dependency, so reading it
+  here would rebuild the site on version bumps that change nothing on the
+  page.
 """
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -29,7 +35,7 @@ BRANCH = "main"
 
 ROOT = Path(__file__).resolve().parent.parent
 README = ROOT / "README.md"
-MANIFEST = ROOT / "MODULE.bazel"
+MANIFEST = ROOT / ".release-please-manifest.json"
 OUTPUT = Path(__file__).resolve().parent / "index.md"
 
 # `[text](target)`, capturing the target. Bare enough to miss exotic markdown,
@@ -48,22 +54,21 @@ def rewrite(target: str) -> str:
     return f"https://github.com/{REPO}/{kind}/{BRANCH}/{target.lstrip('./')}"
 
 
-def module_version() -> str:
-    """Read `version` from the `module()` call.
+def released_version() -> str:
+    """Read the released version from the release-please manifest.
 
-    Scanning only inside the call is what keeps a `bazel_dep` version from
-    being picked up instead; those carry the same attribute name.
+    The key is the package path, which is the repository root because
+    `release-please-config.json` declares a single package at `.`.
     """
-    inside = False
-    for line in MANIFEST.read_text(encoding="utf-8").splitlines():
-        stripped = line.strip()
-        if stripped.startswith("module("):
-            inside = True
-        elif inside and stripped.startswith(")"):
-            break
-        elif inside and stripped.startswith("version"):
-            return stripped.split("=", 1)[1].strip().rstrip(",").strip("\"'")
-    raise SystemExit("no module() version in MODULE.bazel")
+    try:
+        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise SystemExit(f"cannot read {MANIFEST.name}: {exc}")
+
+    version = manifest.get(".")
+    if not version:
+        raise SystemExit(f"no '.' entry in {MANIFEST.name}")
+    return version
 
 
 def split_front(markdown: str) -> tuple[str, str, str, str]:
@@ -118,7 +123,7 @@ def main() -> int:
             f"title: {yaml_quote(title)}",
             f"tagline: {yaml_quote(tagline)}",
             f"lead: {yaml_quote(lead)}",
-            f"version: {yaml_quote(module_version())}",
+            f"version: {yaml_quote(released_version())}",
             "---",
             "",
         ]
