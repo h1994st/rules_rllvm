@@ -3,6 +3,8 @@
 module(name = "rules_rllvm_examples")
 
 bazel_dep(name = "rules_cc", version = "0.2.14")
+bazel_dep(name = "platforms", version = "1.1.0")
+bazel_dep(name = "apple_support", version = "1.24.2")
 bazel_dep(name = "toolchains_llvm", version = "1.6.0")
 bazel_dep(name = "rules_rust", version = "0.74.0")
 bazel_dep(name = "rules_rllvm")
@@ -31,6 +33,13 @@ rllvm.sysroot(
 
 use_repo(rllvm, "rllvm_toolchain")
 use_repo(rllvm, "rllvm_toolchain_llvm")
+
+apple_cc_configure = use_extension(
+    "@apple_support//crosstool:setup.bzl",
+    "apple_cc_configure_extension",
+)
+
+use_repo(apple_cc_configure, "local_config_apple_cc_toolchains")
 
 register_toolchains("@rllvm_toolchain//:all")
 

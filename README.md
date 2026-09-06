@@ -111,7 +111,22 @@ Output groups and merge strategies match the cc rule. One crate is already one m
 
 Loading `//rust:defs.bzl` is what pulls `rules_rust` into a build. A project that extracts only C/C++ bitcode never loads it and never registers a Rust toolchain.
 
-The Rust standard library is not in the extracted module. `std` arrives as precompiled rlibs rather than as a Bazel dependency, so the aspect never sees it and cannot record it as a gap either. Reaching it would need a `-Zbuild-std` toolchain.
+Generic and `#[inline]` code from `std` is monomorphised into the crates that use it, so it does reach the extracted module. What is missing is the rest: `std` arrives as prebuilt rlibs rather than as a Bazel dependency, so the aspect never sees those and cannot record them as a gap either. Reaching them would need a `-Zbuild-std` toolchain.
+
+rustc brings its own LLVM, and it need not match the one `llvm_version` names. Today rustc writes a bitcode summary newer than LLVM 19 accepts: `llvm-link` ignores it and the merge works, while `llvm-dis` rejects the same file. That is two tools disagreeing about strictness rather than a compatibility guarantee, so a much newer Rust toolchain against a much older `llvm_version` is the combination to be careful with.
+
+## Objective-C
+
+`.m` and `.mm` are already compilable sources and `objc_library` provides `CcInfo`, so the aspect reaches Objective-C with no rules of its own — `rllvm_cc_bitcode` takes an `objc_library` like any other target.
+
+`objc_library` refuses any toolchain that does not enable the `objc-compile` action, which in practice means the Apple CC toolchain from `apple_support`. Registering that would outrank the LLVM toolchain for every C/C++ target in the workspace, so pass it for the one invocation instead:
+
+```
+bazel build //objc:greeter_bc \
+  --extra_toolchains=@local_config_apple_cc_toolchains//:all
+```
+
+The compiler and the merge tools are then different LLVM builds. Xcode 21 emitting for LLVM 19 tools works, but LLVM guarantees only that newer readers read older writers, not the reverse, so a newer Xcode against an old `llvm_version` may not. macOS only. See [`examples/objc/`](examples/objc/).
 
 ## Output groups
 

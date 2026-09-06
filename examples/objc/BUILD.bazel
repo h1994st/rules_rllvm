@@ -1,0 +1,26 @@
+load("@rules_cc//cc:defs.bzl", "objc_library")
+load("@rules_rllvm//bitcode:defs.bzl", "rllvm_cc_bitcode")
+
+# Objective-C needs no rules of its own. `objc_library` provides `CcInfo` and
+# `.m` is already a compilable extension, so the cc aspect reaches it unchanged.
+#
+# Both targets are `manual` because they cannot build under the default
+# toolchain: `objc_library` requires the Apple CC toolchain from
+# `apple_support`, and this workspace registers the rules_rllvm one. Build them
+# with `--extra_toolchains=@local_config_apple_cc_toolchains//:all`, which
+# outranks a registered toolchain for that invocation only and leaves every
+# other target on the LLVM toolchain.
+objc_library(
+    name = "greeter",
+    srcs = ["greeter.m"],
+    hdrs = ["greeter.h"],
+    tags = ["manual"],
+    target_compatible_with = ["@platforms//os:macos"],
+)
+
+rllvm_cc_bitcode(
+    name = "greeter_bc",
+    tags = ["manual"],
+    target = ":greeter",
+    target_compatible_with = ["@platforms//os:macos"],
+)
