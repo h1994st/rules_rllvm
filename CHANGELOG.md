@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/h1994st/rules_rllvm/compare/v0.1.1...v0.1.2) (2026-09-06)
+
+
+### Features
+
+* extract bitcode from Objective-C targets ([#34](https://github.com/h1994st/rules_rllvm/issues/34)) ([8fdaad6](https://github.com/h1994st/rules_rllvm/commit/8fdaad621509424013aacb9569cd38edd8226351))
+
 ## [0.1.1](https://github.com/h1994st/rules_rllvm/compare/v0.1.0...v0.1.1) (2026-09-05)
 
 
