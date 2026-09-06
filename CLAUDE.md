@@ -15,6 +15,7 @@ Bazel rules that extract whole-program LLVM bitcode from `cc_library`, `cc_binar
 | `rust/` | the crate-graph aspect and `rllvm_rust_bitcode` |
 | `toolchain/` | LLVM download, bzlmod extension, toolchain registration |
 | `examples/wasm/` | wasm32-wasip1 fixture and its WASI sysroot |
+| `examples/objc/` | Objective-C fixture, built against the Apple CC toolchain |
 | `examples/` | diamond fixture and invariant tests |
 
 ## Build and test
@@ -47,5 +48,7 @@ One long-lived branch, `main`, with temporary feature branches merged by squash 
 **Rust bitcode needs exactly one codegen unit.** With more than one, rustc reports `ignoring emit path because multiple .bc files were produced` and writes none of them where the action declared its output. `rules_rust` forces a single unit for `obj` but not for `llvm-bc`, so the aspect sets it after `construct_arguments`, where it wins.
 
 **Cross-compilation needs no code here, so the test asserts the triple.** A host-targeted module builds and links exactly as a wasm one does, so "the build succeeded" would pass while the wrong thing was extracted. `examples/tests/bitcode_test.sh` reads the target triple back out of the merged module instead.
+
+**Objective-C needs no code, only a different cc toolchain.** `objc_library` fails unless the resolved toolchain enables the `objc-compile` action, which the LLVM toolchain does not. The fixture is `manual` and opts in with `--extra_toolchains`, because registering the Apple toolchain would outrank the LLVM one for every other C/C++ target and quietly change what the rest of the suite exercises.
 
 **A rule cannot set its own tags.** `rllvm_cc_bitcode` targets are built by a wildcard build unless the caller tags them `manual`; this is documented in the README rather than worked around.

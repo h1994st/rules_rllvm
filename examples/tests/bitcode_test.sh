@@ -130,3 +130,25 @@ RN=$(grep -c '"mnemonic": *"RustBitcode' "$LOG" || true)
 [ "$RN" -ge 2 ] || { echo "FAIL: rust one-off ran $RN bitcode actions, expected at least 2"; exit 1; }
 echo "PASS: one-off extraction"
 
+
+# 8. OBJECTIVE-C: the cc aspect reaches objc_library with no rules of its own.
+#
+# macOS only. `objc_library` refuses any toolchain that does not enable the
+# `objc-compile` action, which in practice means the Apple CC toolchain, so it
+# is opted into per invocation rather than registered -- registering it would
+# outrank the LLVM toolchain for every other C/C++ target here.
+if [ "$(uname -s)" = "Darwin" ]; then
+  APPLE_TC="--extra_toolchains=@local_config_apple_cc_toolchains//:all"
+  $BAZEL build //objc:greeter_bc $APPLE_TC >/dev/null 2>&1
+  OBC=$($BAZEL cquery --output=files //objc:greeter_bc $APPLE_TC 2>/dev/null | grep '\.bc$')
+  OSYMS=$("$NM" --defined-only "$OBC")
+
+  # The class symbol rather than the plain C function: it is only emitted if
+  # the Objective-C front end ran, where `rllvm_objc_value` alone would also
+  # appear if the file had been compiled as C.
+  echo "$OSYMS" | grep -q 'OBJC_CLASS_\$_RllvmGreeter' || {
+    echo "FAIL: objc module has no Objective-C class symbol"; exit 1; }
+  echo "PASS: objective-c"
+else
+  echo "SKIP: objective-c (the Apple CC toolchain is macOS only)"
+fi
