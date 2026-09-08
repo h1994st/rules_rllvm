@@ -47,6 +47,8 @@ Guards sit on steps rather than on jobs, because a skipped required check counts
 
 One long-lived branch, `main`, with temporary feature branches merged by squash PR and deleted on merge. Conventional Commits always; `!` or a `BREAKING CHANGE:` footer for breaking changes. Below 1.0 a plain `feat:` is a patch bump, so an unmarked breaking change cannot be corrected after release.
 
+Pull requests follow `.github/PULL_REQUEST_TEMPLATE.md` — Problem, Cause, Fix, Verification, with sections that do not apply deleted rather than left empty — and issues follow the matching form in `.github/ISSUE_TEMPLATE/`. `gh pr create --body` bypasses the template, so the body has to be written to it deliberately.
+
 ## Invariants
 
 **Laziness is the whole design.** Bitcode actions are declared during analysis and execute only when an output group requests them. A stray default output turns every build into the second compile this ruleset exists to avoid, so `examples/tests/bitcode_test.sh` asserts a wildcard build runs none.
