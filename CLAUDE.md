@@ -6,19 +6,19 @@ The `r` is read as *recursive*, not as the rllvm binary these rules once wrapped
 
 ## Layout
 
-| path | role |
-|---|---|
-| `bitcode/defs.bzl` | public API: the `rllvm_cc_bitcode` rule |
-| `bitcode/aspect.bzl` | the cc aspect; propagates `BitcodeInfo` |
-| `bitcode/compile.bzl` | one `.bc` per translation unit |
-| `bitcode/providers.bzl` | `BitcodeInfo`, source classification |
-| `bitcode/toolchain.bzl` | supplies `llvm-link` and `llvm-ar` |
-| `bitcode/merge.bzl` | merge step shared by the cc and Rust rules |
-| `rust/` | the crate-graph aspect and `rllvm_rust_bitcode` |
-| `toolchain/` | LLVM download, bzlmod extension, toolchain registration |
-| `site/` | GitHub Pages source |
-| `examples/` | diamond fixture and the invariant tests |
-| `examples/wasm/`, `examples/rust/`, `examples/objc/` | per-language fixtures |
+| path                                                 | role                                                    |
+| ---------------------------------------------------- | ------------------------------------------------------- |
+| `bitcode/defs.bzl`                                   | public API: the `rllvm_cc_bitcode` rule                 |
+| `bitcode/aspect.bzl`                                 | the cc aspect; propagates `BitcodeInfo`                 |
+| `bitcode/compile.bzl`                                | one `.bc` per translation unit                          |
+| `bitcode/providers.bzl`                              | `BitcodeInfo`, source classification                    |
+| `bitcode/toolchain.bzl`                              | supplies `llvm-link` and `llvm-ar`                      |
+| `bitcode/merge.bzl`                                  | merge step shared by the cc and Rust rules              |
+| `rust/`                                              | the crate-graph aspect and `rllvm_rust_bitcode`         |
+| `toolchain/`                                         | LLVM download, bzlmod extension, toolchain registration |
+| `site/`                                              | GitHub Pages source                                     |
+| `examples/`                                          | diamond fixture and the invariant tests                 |
+| `examples/wasm/`, `examples/rust/`, `examples/objc/` | per-language fixtures                                   |
 
 ## Build and test
 
@@ -45,11 +45,15 @@ Guards sit on steps rather than on jobs, because a skipped required check counts
 
 ## Git workflow
 
-One long-lived branch, `main`, with temporary feature branches merged by squash PR and deleted on merge. Conventional Commits always; `!` or a `BREAKING CHANGE:` footer for breaking changes. Below 1.0 a plain `feat:` is a patch bump, so an unmarked breaking change cannot be corrected after release.
+One long-lived branch, `main`, with temporary feature branches merged by squash PR and deleted on merge.
+
+### Commits
+
+[Conventional Commits](https://www.conventionalcommits.org/): `<type>: <summary>` using the types already in the log. Keep the body short or empty. PR titles follow the same format. `!` or a `BREAKING CHANGE:` footer for breaking changes. Below 1.0 a plain `feat:` is a patch bump, so an unmarked breaking change cannot be corrected after release.
 
 Pull requests follow `.github/PULL_REQUEST_TEMPLATE.md` — Problem, Cause, Fix, Verification, with sections that do not apply deleted rather than left empty — and issues follow the matching form in `.github/ISSUE_TEMPLATE/`. `gh pr create --body` bypasses the template, so the body has to be written to it deliberately.
 
-Write the body as bullets, never prose:
+In PR and issue body, cut narrative framing and paragraphs justifying what the diff already shows. Use bullets, never prose:
 
 - **One bullet per point.** No paragraph does the work of two bullets.
 - **Terse.** Every clause carries a fact or goes.
