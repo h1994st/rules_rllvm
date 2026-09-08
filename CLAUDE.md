@@ -53,7 +53,8 @@ Write the body as bullets, never prose:
 
 - **One bullet per point.** No paragraph does the work of two bullets.
 - **Terse.** Every clause carries a fact or goes.
-- **Complete.** Every decision, rejected alternative and correction gets a bullet. Terseness is per bullet, never a reason to drop one.
+- **Complete.** Every correction and every fact a reviewer needs gets a bullet. Terseness is per bullet, never a reason to drop one.
+- **No design diary.** Alternatives considered and rejected stay out unless they bear on the next change. `.github/ISSUE_TEMPLATE/enhancement.yml` is where those belong.
 - **Faithful.** What was done and why it was done. Failures, skipped work and unverified claims get bullets too.
 
 ## Invariants
