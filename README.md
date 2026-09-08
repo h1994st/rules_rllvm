@@ -73,7 +73,11 @@ bazel build //:app \
   --output_groups=bitcode_files
 ```
 
-## WebAssembly
+## Targets
+
+`rllvm_cc_bitcode` covers C, C++ and Objective-C, and Rust has a rule of its own. Each subsection below changes the target rather than the shape above.
+
+### WebAssembly
 
 Each action is built from whichever cc toolchain the platform resolved, so the bitcode follows the target:
 
@@ -93,7 +97,7 @@ rllvm.sysroot(
 
 `sysroot` and `stdlib` are keyed by target pair, so one toolchain serves the host and wasm together and the wasm entries leave the host defaults alone. See [`examples/wasm/`](examples/wasm/).
 
-## Rust
+### Rust
 
 ```starlark
 load("@rules_rllvm//rust:defs.bzl", "rllvm_rust_bitcode")
@@ -121,7 +125,7 @@ Loading `//rust:defs.bzl` is what pulls `rules_rust` into a build. A project tha
 
 See [`examples/rust/`](examples/rust/).
 
-## Objective-C
+### Objective-C
 
 `.m` and `.mm` are already compilable sources and `objc_library` provides `CcInfo`, so `rllvm_cc_bitcode` takes an `objc_library` like any other target. There is nothing Objective-C-specific to load.
 
