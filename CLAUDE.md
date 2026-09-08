@@ -49,6 +49,13 @@ One long-lived branch, `main`, with temporary feature branches merged by squash 
 
 Pull requests follow `.github/PULL_REQUEST_TEMPLATE.md` — Problem, Cause, Fix, Verification, with sections that do not apply deleted rather than left empty — and issues follow the matching form in `.github/ISSUE_TEMPLATE/`. `gh pr create --body` bypasses the template, so the body has to be written to it deliberately.
 
+Write the body as bullets, never prose:
+
+- **One bullet per point.** No paragraph does the work of two bullets.
+- **Terse.** Every clause carries a fact or goes.
+- **Complete.** Every decision, rejected alternative and correction gets a bullet. Terseness is per bullet, never a reason to drop one.
+- **Faithful.** What was done and why it was done. Failures, skipped work and unverified claims get bullets too.
+
 ## Invariants
 
 **Laziness is the whole design.** Bitcode actions are declared during analysis and execute only when an output group requests them. A stray default output turns every build into the second compile this ruleset exists to avoid, so `examples/tests/bitcode_test.sh` asserts a wildcard build runs none.
